@@ -60,7 +60,10 @@
     "no_results": "📭 لا توجد نتائج",
     "page": "صفحة",
     "of": "من",
-    "total": "الإجمالي"
+    "total": "الإجمالي",
+    "language_changed": "✅ تم تغيير اللغة إلى {locale}",
+    "confirmed": "✅ تم التأكيد!",
+    "cancelled": "❌ تم الإلغاء"
   },
   "alliances": {
     "title": "🏰 إدارة التحالفات",
@@ -76,7 +79,10 @@
     "players_count": "عدد اللاعبين",
     "status_active": "نشط",
     "status_inactive": "غير نشط",
-    "confirm_delete": "هل أنت متأكد من حذف هذا التحالف؟"
+    "confirm_delete": "هل أنت متأكد من حذف هذا التحالف؟",
+    "auto_enabled": "تم تفعيل الاسترداد التلقائي",
+    "auto_disabled": "تم تعطيل الاسترداد التلقائي",
+    "auto_enabled_for": "تم تفعيل الاسترداد التلقائي لـ {name}"
   },
   "players": {
     "title": "👥 إدارة اللاعبين",
@@ -118,7 +124,8 @@
     "code_settings": "⚙️ إعدادات الأكواد",
     "captcha_settings": "🔐 إعدادات Captcha",
     "report": "📋 تقرير الاسترداد",
-    "new_code_notification": "🔔 كود جديد تم استلامه"
+    "new_code_notification": "🔔 كود جديد تم استلامه",
+    "demo_mode_warning": "⚠️ وضع المحاكاة - ليس استرداداً حقيقياً"
   },
   "events": {
     "title": "📅 إدارة الأحداث",
@@ -309,7 +316,11 @@
     "timeout_error": "انتهت مهلة الطلب",
     "invalid_token": "رمز غير صالح",
     "rate_limit": "تم تجاوز الحد المسموح",
-    "server_error": "خطأ في الخادم"
+    "server_error": "خطأ في الخادم",
+    "gift_api_required": "GIFT_CODE_API_BASE_URL مطلوب للإنتاج",
+    "captcha_required": "CAPTCHA_SERVICE_URL و TOKEN مطلوبان للإنتاج",
+    "demo_mode_active": "⚠️ وضع المحاكاة نشط - ليس للإنتاج",
+    "demo_mode_warning": "⚠️ وضع المحاكاة - ليس استرداداً حقيقياً"
   },
   "audit": {
     "action": "الإجراء",

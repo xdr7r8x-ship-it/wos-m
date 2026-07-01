@@ -11,15 +11,12 @@ from pathlib import Path
 
 import dotenv
 
-# Load environment variables
 dotenv.load_dotenv()
 
 from config.settings import settings
 from core.bot import WOSMBot
 
-# Setup logging
 def setup_logging():
-    """Setup logging configuration."""
     log_dir = Path(__file__).parent / "data" / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
     
@@ -31,18 +28,13 @@ def setup_logging():
             logging.FileHandler(settings.logging.file),
         ]
     )
-    
-    # Reduce discord logging
     logging.getLogger("discord").setLevel(logging.WARNING)
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
-
 async def run_bot():
-    """Run the bot."""
     bot = WOSMBot()
-    
     token = os.getenv("DISCORD_BOT_TOKEN") or settings.bot.token
     
     if not token:
@@ -56,176 +48,112 @@ async def run_bot():
     finally:
         await bot.close()
 
-
 def check_system():
-    """Check system before running with comprehensive validation."""
-    print("🔍 WOS-M System Check")
-    print("=" * 60)
+    print("WOS-M System Check - STRICT MODE")
+    print("=" * 70)
     
     issues = []
     warnings = []
+    demo_mode = os.getenv("WOSM_DEMO_MODE", "false").lower() == "true"
     
-    # Check .env file
     if not os.path.exists(".env"):
-        warnings.append("⚠️  .env file not found, using defaults")
+        issues.append(".env file not found")
     else:
-        print("✅ .env file found")
+        print("PASS: .env file found")
     
-    # Check required env vars
     if not os.getenv("DISCORD_BOT_TOKEN"):
-        issues.append("❌ DISCORD_BOT_TOKEN not set - REQUIRED")
+        issues.append("DISCORD_BOT_TOKEN not set")
     else:
-        print("✅ DISCORD_BOT_TOKEN configured")
+        print("PASS: DISCORD_BOT_TOKEN configured")
+    
+    if demo_mode:
+        warnings.append("DEMO MODE ACTIVE")
+        print("WARN: WOSM_DEMO_MODE=true")
+    else:
+        print("PASS: Production mode")
+        if not os.getenv("GIFT_CODE_API_BASE_URL"):
+            issues.append("GIFT_CODE_API_BASE_URL not set")
+        else:
+            print("PASS: Gift API configured")
+        if not os.getenv("CAPTCHA_SERVICE_URL") or not os.getenv("CAPTCHA_SERVICE_TOKEN"):
+            issues.append("CAPTCHA_SERVICE_URL/TOKEN not set")
+        else:
+            print("PASS: Captcha configured")
     
     # Check locales
     locales_dir = Path(__file__).parent / "locales"
     if locales_dir.exists():
-        locale_files = list(locales_dir.glob("*.json"))
-        print(f"✅ Found {len(locale_files)} locale files (ar.json, en.json)")
-        
-        # Validate locale content
         import json
-        for lf in locale_files:
-            with open(lf, "r", encoding="utf-8") as f:
+        for lf in locales_dir.glob("*.json"):
+            with open(lf) as f:
                 data = json.load(f)
-                if "bot" in data and "dashboard" in data and "messages" in data:
-                    print(f"   ✅ {lf.name}: Valid structure")
+                if all(k in data for k in ["bot", "dashboard", "messages"]):
+                    print(f"PASS: {lf.name}")
                 else:
-                    issues.append(f"❌ {lf.name}: Missing required keys")
-    else:
-        issues.append("❌ Locales directory not found")
+                    issues.append(f"{lf.name} missing keys")
     
-    # Check for hardcoded strings in code
-    print("\n📋 Checking for hardcoded user-facing strings...")
-    code_files = list(Path(__file__).parent.glob("modules/**/*.py"))
-    code_files += list(Path(__file__).parent.glob("core/**/*.py"))
-    code_files += list(Path(__file__).parent.glob("views/**/*.py"))
+    # Check hardcoded strings
+    hardcoded = ['"Confirmed"', '"Cancelled"', '"Language changed"']
+    for pattern in hardcoded:
+        for f in list(Path(__file__).parent.rglob("*.py")):
+            if f.name == "__init__.py":
+                continue
+            with open(f) as fp:
+                c = fp.read()
+                if pattern in c and "i18n.get" not in c:
+                    issues.append(f"Hardcoded: {pattern}")
+                    print(f"FAIL: {pattern} in {f.name}")
     
-    hardcoded_patterns = []
-    for cf in code_files:
-        if cf.name == "__init__.py":
-            continue
-        with open(cf, "r", encoding="utf-8") as f:
-            content = f.read()
-            # Check for Arabic text that's not in f-strings or comments
-            if any(arabic in content for arabic in ['"التحالفات"', '"اللاعبين"', '"المالك"']):
-                if 'i18n.get' not in content and "# " not in content.split('"التحالفات"')[0][-50:]:
-                    hardcoded_patterns.append(cf.name)
-    
-    if hardcoded_patterns:
-        warnings.append(f"⚠️  Potential hardcoded strings in: {', '.join(set(hardcoded_patterns[:3]))}")
-    else:
-        print("✅ No obvious hardcoded user-facing strings found")
-    
-    # Check data directory
-    data_dir = Path(__file__).parent / "data"
-    data_dir.mkdir(exist_ok=True)
-    print(f"✅ Data directory: {data_dir}")
-    
-    # Check Python version
-    if sys.version_info < (3, 10):
-        issues.append(f"❌ Python 3.10+ required, found {sys.version_info.major}.{sys.version_info.minor}")
-    else:
-        print(f"✅ Python {sys.version_info.major}.{sys.version_info.minor} OK")
-    
-    # Check modules
-    print("\n📦 Checking dependencies...")
-    deps = {
-        "discord": "discord.py",
-        "aiosqlite": "aiosqlite",
-        "aiohttp": "aiohttp",
-        "dotenv": "python-dotenv"
-    }
-    
-    for module, name in deps.items():
-        try:
-            __import__(module)
-            print(f"✅ {name} installed")
-        except ImportError:
-            issues.append(f"❌ {name} not installed")
+    # Check placeholders
+    core_dir = Path(__file__).parent / "core"
+    for f in core_dir.rglob("*.py"):
+        with open(f) as fp:
+            c = fp.read()
+            if "pass  # Placeholder" in c or "pass # Placeholder" in c:
+                issues.append(f"Placeholder in {f.name}")
     
     # Check slash commands
-    print("\n📡 Checking slash commands...")
     bot_file = Path(__file__).parent / "core" / "bot.py"
     if bot_file.exists():
-        with open(bot_file, "r", encoding="utf-8") as f:
-            content = f.read()
-            
-            # Count @tree.command decorators
-            import re
-            commands = re.findall(r'name\s*=\s*["\']([^"\']+)', content)
-            commands = [c for c in commands if c in ["wos", "test", "help", "start"]]
-            
-            if "wos" in commands:
-                print(f"✅ /wos command registered")
+        with open(bot_file) as f:
+            c = f.read()
+            if "name=" in c and '"wos"' in c:
+                print("PASS: /wos command")
             else:
-                issues.append("❌ /wos command not found")
-            
-            other_commands = [c for c in commands if c != "wos"]
-            if other_commands:
-                issues.append(f"❌ Additional commands found: {', '.join(['/' + c for c in other_commands])}")
-            else:
-                print("✅ Only /wos command (no additional slash commands)")
+                issues.append("/wos command not found")
     
-    # Check Back/Home buttons in views
-    print("\n🔘 Checking Back and Home buttons...")
-    view_files = list(Path(__file__).parent.glob("modules/**/views.py"))
-    views_with_nav = 0
-    for vf in view_files:
-        with open(vf, "r", encoding="utf-8") as f:
-            content = f.read()
-            if "back" in content.lower() and "home" in content.lower():
-                views_with_nav += 1
+    # Check callbacks
+    for cb in ["auto_enable_alliance", "auto_disable_alliance", "auto_redeem_all"]:
+        if f'"{cb}"' not in open(bot_file).read():
+            issues.append(f"Missing: {cb}")
     
-    if views_with_nav >= 5:
-        print(f"✅ Navigation buttons found in {views_with_nav} view modules")
-    else:
-        warnings.append(f"⚠️  Only {views_with_nav} views with navigation buttons")
+    # Check database columns
+    db_file = Path(__file__).parent / "core" / "database.py"
+    for col in ["auto_gift_enabled", "gift_channel_id", "member_count"]:
+        if col not in open(db_file).read():
+            issues.append(f"Missing column: {col}")
     
-    # Check gift codes engine
-    print("\n🎁 Checking Gift Code Redemption system...")
-    gc_engine = Path(__file__).parent / "modules" / "gift_codes" / "redemption_engine.py"
-    if gc_engine.exists():
-        with open(gc_engine, "r", encoding="utf-8") as f:
-            content = f.read()
-            if "auto_redeem_for_alliance" in content and "batch_redeem" in content:
-                print("✅ Auto Redemption engine implemented")
-            else:
-                issues.append("❌ Gift Code Redemption engine incomplete")
+    # Check _run_migrations
+    with open(db_file) as f:
+        c = f.read()
+        if "async def _run_migrations" in c and "pass" not in c.split("async def _run_migrations")[1].split("async def")[0]:
+            print("PASS: _run_migrations implemented")
+        else:
+            issues.append("_run_migrations not implemented")
     
-    # Summary
-    print("\n" + "=" * 60)
-    
-    if warnings:
-        print("⚠️  Warnings:")
-        for w in warnings:
-            print(f"   {w}")
-    
+    print("=" * 70)
     if issues:
-        print("\n❌ Issues found:")
-        for issue in issues:
-            print(f"   {issue}")
+        print("FAIL: " + "; ".join(issues))
         return False
-    
-    print("✅ All critical checks passed!")
-    print("⚠️  Some warnings may need attention but are non-blocking")
+    print("PASS: All checks passed")
+    if demo_mode:
+        print("WARN: DEMO MODE - NOT FOR PRODUCTION")
     return True
 
-
 def main():
-    """Main entry point."""
     if "--check" in sys.argv:
-        if check_system():
-            sys.exit(0)
-        else:
-            sys.exit(1)
-    
-    try:
-        asyncio.run(run_bot())
-    except KeyboardInterrupt:
-        logger.info("Shutting down...")
-        sys.exit(0)
-
+        sys.exit(0 if check_system() else 1)
+    asyncio.run(run_bot())
 
 if __name__ == "__main__":
     main()

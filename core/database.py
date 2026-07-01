@@ -166,6 +166,8 @@ class Database:
                 state_kid TEXT,
                 discord_guild_id TEXT,
                 auto_gift_enabled BOOLEAN DEFAULT 0,
+                gift_channel_id TEXT,
+                member_count INTEGER DEFAULT 0,
                 sync_enabled BOOLEAN DEFAULT 0,
                 report_channel_id TEXT,
                 is_active BOOLEAN DEFAULT 1,
@@ -376,8 +378,53 @@ class Database:
     
     async def _run_migrations(self):
         """Run any pending migrations."""
-        # For future migrations
-        pass
+        # Create migrations tracking table
+        await self._db.execute("""
+            CREATE TABLE IF NOT EXISTS _migrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Get applied migrations
+        async with self._db.execute("SELECT name FROM _migrations") as cursor:
+            applied = {row[0] for row in await cursor.fetchall()}
+        
+        migrations = [
+            {
+                "name": "add_alliance_gift_channel",
+                "sql": "ALTER TABLE alliances ADD COLUMN gift_channel_id TEXT;"
+            },
+            {
+                "name": "add_alliance_member_count",
+                "sql": "ALTER TABLE alliances ADD COLUMN member_count INTEGER DEFAULT 0;"
+            },
+            {
+                "name": "add_redemption_unique",
+                "sql": """
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_redemption_unique 
+                    ON gift_redemptions(code_id, player_id);
+                """
+            }
+        ]
+        
+        for migration in migrations:
+            if migration["name"] not in applied:
+                try:
+                    for statement in migration["sql"].strip().split(";"):
+                        stmt = statement.strip()
+                        if stmt:
+                            await self._db.execute(stmt)
+                    await self._db.execute(
+                        "INSERT INTO _migrations (name) VALUES (?)",
+                        (migration["name"],)
+                    )
+                    await self._db.commit()
+                    logger.info(f"Migration applied: {migration['name']}")
+                except Exception as e:
+                    logger.warning(f"Migration {migration['name']}: {e}")
+                    await self._db.rollback()
     
     async def execute(self, query: str, parameters: Tuple = ()) -> aiosqlite.Cursor:
         """Execute a query."""

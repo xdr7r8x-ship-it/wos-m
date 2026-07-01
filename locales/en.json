@@ -60,7 +60,10 @@
     "no_results": "📭 No results found",
     "page": "Page",
     "of": "of",
-    "total": "Total"
+    "total": "Total",
+    "language_changed": "✅ Language changed to {locale}",
+    "confirmed": "✅ Confirmed!",
+    "cancelled": "❌ Cancelled"
   },
   "alliances": {
     "title": "🏰 Alliance Management",
@@ -76,7 +79,10 @@
     "players_count": "Player Count",
     "status_active": "Active",
     "status_inactive": "Inactive",
-    "confirm_delete": "Are you sure you want to delete this alliance?"
+    "confirm_delete": "Are you sure you want to delete this alliance?",
+    "auto_enabled": "Auto Redeem Enabled",
+    "auto_disabled": "Auto Redeem Disabled",
+    "auto_enabled_for": "Auto redeem enabled for {name}"
   },
   "players": {
     "title": "👥 Player Management",
@@ -118,7 +124,8 @@
     "code_settings": "⚙️ Code Settings",
     "captcha_settings": "🔐 Captcha Settings",
     "report": "📋 Redemption Report",
-    "new_code_notification": "🔔 New code received"
+    "new_code_notification": "🔔 New code received",
+    "demo_mode_warning": "⚠️ Demo Mode - NOT REAL REDEMPTION"
   },
   "events": {
     "title": "📅 Event Management",
@@ -309,7 +316,11 @@
     "timeout_error": "Request timeout",
     "invalid_token": "Invalid token",
     "rate_limit": "Rate limit exceeded",
-    "server_error": "Server error"
+    "server_error": "Server error",
+    "gift_api_required": "GIFT_CODE_API_BASE_URL is required for production",
+    "captcha_required": "CAPTCHA_SERVICE_URL and TOKEN are required for production",
+    "demo_mode_active": "⚠️ Demo mode active - not for production",
+    "demo_mode_warning": "⚠️ Demo Mode - NOT REAL REDEMPTION"
   },
   "audit": {
     "action": "Action",

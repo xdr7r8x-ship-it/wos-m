@@ -298,10 +298,10 @@ class WOSMBot(discord.Client):
         await feature_management_callback(self, interaction)
     
     async def _handle_confirm(self, interaction: discord.Interaction):
-        await interaction.response.send_message("✅ Confirmed!", ephemeral=True)
+        await interaction.response.send_message(i18n.get("messages.action_completed"), ephemeral=True)
     
     async def _handle_cancel(self, interaction: discord.Interaction):
-        await interaction.response.send_message("❌ Cancelled", ephemeral=True)
+        await interaction.response.send_message(i18n.get("messages.action_cancelled"), ephemeral=True)
     
     async def _handle_language_select(self, interaction: discord.Interaction):
         """Handle language selection."""
@@ -309,7 +309,7 @@ class WOSMBot(discord.Client):
             new_locale = interaction.data["values"][0]
             await i18n.set_locale(new_locale)
             await interaction.response.send_message(
-                f"✅ Language changed to {new_locale}",
+                i18n.get("messages.language_changed", locale=new_locale),
                 ephemeral=True
             )
     
@@ -347,8 +347,8 @@ class WOSMBot(discord.Client):
             alliance_name = row["name"] if row else "Unknown"
             
             embed = discord.Embed(
-                title="✅ Auto Redeem Enabled",
-                description=f"Auto redeem has been enabled for **{alliance_name}**",
+                title=f"✅ {i18n.get('alliances.auto_enabled')}",
+                description=f"**{alliance_name}**",
                 color=0x2ecc71
             )
             
@@ -378,8 +378,8 @@ class WOSMBot(discord.Client):
             alliance_name = row["name"] if row else "Unknown"
             
             embed = discord.Embed(
-                title="❌ Auto Redeem Disabled",
-                description=f"Auto redeem has been disabled for **{alliance_name}**",
+                title=f"❌ {i18n.get('alliances.auto_disabled')}",
+                description=f"**{alliance_name}**",
                 color=0xe74c3c
             )
             
