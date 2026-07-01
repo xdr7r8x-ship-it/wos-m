@@ -318,8 +318,30 @@ class ProcessQueue:
                 await db.commit()
     
     async def _handle_alliance_update(self, data: Dict[str, Any]):
-        """Handle alliance update."""
-        pass  # Placeholder
+        """Handle alliance update from WOS API."""
+        alliance_id = data.get("alliance_id")
+        
+        if not alliance_id:
+            return
+        
+        alliance = await db.fetchone(
+            "SELECT * FROM alliances WHERE id = ?",
+            (alliance_id,)
+        )
+        
+        if alliance:
+            # Update alliance info
+            await db.execute(
+                """UPDATE alliances SET 
+                   name = ?, member_count = ?, updated_at = CURRENT_TIMESTAMP
+                   WHERE id = ?""",
+                (
+                    data.get("name", alliance["name"]),
+                    data.get("member_count", alliance["member_count"]),
+                    alliance_id
+                )
+            )
+            await db.connection.commit()
     
     async def _handle_alliance_sync(self, data: Dict[str, Any]):
         """Handle alliance sync."""
@@ -336,5 +358,23 @@ class ProcessQueue:
                 await wos_api_client.sync_alliance(alliance["state_kid"])
     
     async def _handle_report_generation(self, data: Dict[str, Any]):
-        """Handle report generation."""
-        pass  # Placeholder
+        """Handle report generation task."""
+        from core.audit_log import audit_log
+        
+        report_type = data.get("type", "summary")
+        
+        if report_type == "gift_summary":
+            from modules.gift_codes.service import gift_code_service
+            stats = await gift_code_service.get_stats()
+            return {"type": "gift_summary", "data": stats}
+        
+        elif report_type == "attendance":
+            event_id = data.get("event_id")
+            if event_id:
+                records = await db.fetchall(
+                    "SELECT * FROM attendance_records WHERE event_id = ?",
+                    (event_id,)
+                )
+                return {"type": "attendance", "data": records}
+        
+        return {"type": report_type, "data": {}}

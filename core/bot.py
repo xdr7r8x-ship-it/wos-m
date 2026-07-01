@@ -71,6 +71,10 @@ class WOSMBot(discord.Client):
             "gift_redeem_alliance": self._handle_gift_redeem_alliance,
             "gift_auto": self._handle_gift_auto,
             "gift_report": self._handle_gift_report,
+            # Auto redeem
+            "auto_enable_alliance": self._handle_auto_enable_alliance,
+            "auto_disable_alliance": self._handle_auto_disable_alliance,
+            "auto_redeem_all": self._handle_auto_redeem_all,
             # Owner panel
             "owner_panel_language": self._handle_owner_language,
             "owner_panel_buttons": self._handle_owner_buttons,
@@ -88,6 +92,8 @@ class WOSMBot(discord.Client):
         self._select_callbacks = {
             "language_select": self._handle_language_select,
             "owner_panel_section_select": self._handle_owner_section_select,
+            "alliance_select_enable": self._handle_alliance_select_enable,
+            "alliance_select_disable": self._handle_alliance_select_disable,
         }
     
     async def setup_hook(self):
@@ -125,6 +131,8 @@ class WOSMBot(discord.Client):
     
     async def _register_commands(self):
         """Register slash commands."""
+        # Clear existing commands
+        self.tree.clear_commands(guild=None)
         
         @self.tree.command(
             name="wos",
@@ -248,6 +256,22 @@ class WOSMBot(discord.Client):
         from modules.gift_codes.views import gift_report_callback
         await gift_report_callback(self, interaction)
     
+    # Auto redeem handlers
+    async def _handle_auto_enable_alliance(self, interaction: discord.Interaction):
+        """Enable auto redeem for an alliance."""
+        from modules.gift_codes.views import enable_auto_redeem_callback
+        await enable_auto_redeem_callback(self, interaction)
+    
+    async def _handle_auto_disable_alliance(self, interaction: discord.Interaction):
+        """Disable auto redeem for an alliance."""
+        from modules.gift_codes.views import disable_auto_redeem_callback
+        await disable_auto_redeem_callback(self, interaction)
+    
+    async def _handle_auto_redeem_all(self, interaction: discord.Interaction):
+        """Redeem a code for all alliances with auto redeem enabled."""
+        from modules.gift_codes.views import redeem_all_alliances_callback
+        await redeem_all_alliances_callback(self, interaction)
+    
     # Owner panel handlers
     async def _handle_owner_language(self, interaction: discord.Interaction):
         from modules.owner_panel.views import language_management_callback
@@ -306,6 +330,68 @@ class WOSMBot(discord.Client):
             handler = handlers.get(section)
             if handler:
                 await handler(interaction)
+    
+    async def _handle_alliance_select_enable(self, interaction: discord.Interaction):
+        """Handle alliance selection for enabling auto redeem."""
+        if interaction.data.get("values"):
+            alliance_id = int(interaction.data["values"][0])
+            
+            # Update database
+            await db.execute(
+                "UPDATE alliances SET auto_gift_enabled = 1 WHERE id = ?",
+                (alliance_id,)
+            )
+            await db.connection.commit()
+            
+            row = await db.fetchone("SELECT name FROM alliances WHERE id = ?", (alliance_id,))
+            alliance_name = row["name"] if row else "Unknown"
+            
+            embed = discord.Embed(
+                title="✅ Auto Redeem Enabled",
+                description=f"Auto redeem has been enabled for **{alliance_name}**",
+                color=0x2ecc71
+            )
+            
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            
+            await audit_log.log(
+                user_id=str(interaction.user.id),
+                user_name=str(interaction.user),
+                action="enable_auto_redeem",
+                category=AuditCategory.GIFT_CODES,
+                details={"alliance_id": alliance_id, "alliance_name": alliance_name}
+            )
+    
+    async def _handle_alliance_select_disable(self, interaction: discord.Interaction):
+        """Handle alliance selection for disabling auto redeem."""
+        if interaction.data.get("values"):
+            alliance_id = int(interaction.data["values"][0])
+            
+            # Update database
+            await db.execute(
+                "UPDATE alliances SET auto_gift_enabled = 0 WHERE id = ?",
+                (alliance_id,)
+            )
+            await db.connection.commit()
+            
+            row = await db.fetchone("SELECT name FROM alliances WHERE id = ?", (alliance_id,))
+            alliance_name = row["name"] if row else "Unknown"
+            
+            embed = discord.Embed(
+                title="❌ Auto Redeem Disabled",
+                description=f"Auto redeem has been disabled for **{alliance_name}**",
+                color=0xe74c3c
+            )
+            
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            
+            await audit_log.log(
+                user_id=str(interaction.user.id),
+                user_name=str(interaction.user),
+                action="disable_auto_redeem",
+                category=AuditCategory.GIFT_CODES,
+                details={"alliance_id": alliance_id, "alliance_name": alliance_name}
+            )
     
     async def on_ready(self):
         """Called when bot is ready."""

@@ -414,3 +414,144 @@ async def gift_report_callback(bot: WOSMBot, interaction: discord.Interaction):
     embed.set_footer(text=i18n.get("bot.footer"))
     
     await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+async def enable_auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Enable auto redeem for an alliance - shows alliance selection."""
+    rows = await db.fetchall("SELECT id, name FROM alliances WHERE is_active = 1")
+    
+    if not rows:
+        await interaction.response.send_message(
+            i18n.get("messages.no_results"),
+            ephemeral=True
+        )
+        return
+    
+    # Create alliance selection
+    view = discord.ui.View()
+    select = discord.ui.Select(
+        placeholder=i18n.get("messages.select_option"),
+        custom_id="alliance_select_enable"
+    )
+    
+    for alliance in rows:
+        select.add_option(
+            label=alliance["name"],
+            value=str(alliance["id"])
+        )
+    
+    view.add_item(select)
+    
+    embed = discord.Embed(
+        title=f"✅ {i18n.get('gift_codes.auto_redeem')}",
+        description=i18n.get("messages.select_option"),
+        color=0x2ecc71
+    )
+    
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def disable_auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Disable auto redeem for an alliance - shows alliance selection."""
+    rows = await db.fetchall("SELECT id, name FROM alliances WHERE is_active = 1")
+    
+    if not rows:
+        await interaction.response.send_message(
+            i18n.get("messages.no_results"),
+            ephemeral=True
+        )
+        return
+    
+    view = discord.ui.View()
+    select = discord.ui.Select(
+        placeholder=i18n.get("messages.select_option"),
+        custom_id="alliance_select_disable"
+    )
+    
+    for alliance in rows:
+        select.add_option(
+            label=alliance["name"],
+            value=str(alliance["id"])
+        )
+    
+    view.add_item(select)
+    
+    embed = discord.Embed(
+        title=f"❌ {i18n.get('gift_codes.auto_redeem')}",
+        description=i18n.get("messages.select_option"),
+        color=0xe74c3c
+    )
+    
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def redeem_all_alliances_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Redeem a code for all alliances with auto redeem enabled."""
+    modal = discord.ui.Modal(title=i18n.get("gift_codes.redeem_all"))
+    
+    code_input = discord.ui.TextInput(
+        label=i18n.get("gift_codes.code"),
+        placeholder="WOSM123456",
+        required=True,
+        max_length=50
+    )
+    modal.add_item(code_input)
+    
+    await interaction.response.send_modal(modal)
+    await modal.wait()
+    
+    code = code_input.value.strip().upper()
+    
+    if not code:
+        await interaction.followup.send(
+            i18n.get("messages.required_field"),
+            ephemeral=True
+        )
+        return
+    
+    # Get alliances with auto redeem enabled
+    rows = await db.fetchall(
+        "SELECT id, name FROM alliances WHERE is_active = 1 AND auto_gift_enabled = 1"
+    )
+    
+    if not rows:
+        await interaction.followup.send(
+            i18n.get("messages.no_results"),
+            ephemeral=True
+        )
+        return
+    
+    await interaction.followup.send(
+        f"⏳ {i18n.get('messages.processing')}\n{i18n.get('gift_codes.code')}: `{code}`\n{i18n.get('gift_codes.redeem_all')}: {len(rows)}",
+        ephemeral=True
+    )
+    
+    total_success = 0
+    total_failed = 0
+    
+    for alliance in rows:
+        result = await redemption_engine.batch_redeem(code, alliance["id"])
+        total_success += result.get("success", 0)
+        total_failed += result.get("failure", 0)
+    
+    embed = discord.Embed(
+        title=f"🌐 {i18n.get('gift_codes.redeem_all')}",
+        description=f"**{i18n.get('gift_codes.code')}:** `{code}`",
+        color=0x3498db
+    )
+    embed.add_field(
+        name=i18n.get("gift_codes.report"),
+        value=f"**{i18n.get('gift_codes.status_redeemed')}:** {total_success}\n**{i18n.get('gift_codes.status_failed')}:** {total_failed}",
+        inline=True
+    )
+    embed.set_footer(text=i18n.get("bot.footer"))
+    
+    await interaction.followup.send(embed=embed, ephemeral=True)
+    
+    await audit_log.log(
+        user_id=str(interaction.user.id),
+        user_name=str(interaction.user),
+        action="redeem_all_alliances",
+        category=AuditCategory.GIFT_CODES,
+        details={"code": code, "success": total_success, "failed": total_failed}
+    )

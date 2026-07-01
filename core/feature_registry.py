@@ -68,17 +68,19 @@ class FeatureManifest:
     @classmethod
     def from_db_row(cls, row) -> "FeatureManifest":
         """Create from database row."""
+        # Convert sqlite3.Row to dict
+        row_dict = dict(row)
         return cls(
-            key=row["feature_key"],
-            name_ar=row["name_ar"],
-            name_en=row["name_en"],
-            description_ar=row.get("description_ar", ""),
-            description_en=row.get("description_en", ""),
-            icon=row.get("icon", "⚙️"),
-            enabled=bool(row["is_enabled"]),
-            required_permission=row.get("required_permission", "member"),
-            entry_button=bool(row.get("entry_button", True)),
-            handler=row.get("handler_path", "")
+            key=row_dict["feature_key"],
+            name_ar=row_dict["name_ar"],
+            name_en=row_dict["name_en"],
+            description_ar=row_dict.get("description_ar", ""),
+            description_en=row_dict.get("description_en", ""),
+            icon=row_dict.get("icon", "⚙️"),
+            enabled=bool(row_dict["is_enabled"]),
+            required_permission=row_dict.get("required_permission", "member"),
+            entry_button=bool(row_dict.get("entry_button", True)),
+            handler=row_dict.get("handler_path", "")
         )
 
 

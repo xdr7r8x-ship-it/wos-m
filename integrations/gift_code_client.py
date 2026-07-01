@@ -23,6 +23,7 @@ class GiftCodeStatus:
     REDEEMED = "redeemed"
     ALREADY_REDEEMED = "already_redeemed"
     FAILED = "failed"
+    DEMO_MODE = "demo_mode"
 
 
 class GiftCodeClient:
@@ -42,9 +43,21 @@ class GiftCodeClient:
         self._captcha_token: Optional[str] = None
         self._captcha_expires: Optional[datetime] = None
     
+    @property
+    def is_demo_mode(self) -> bool:
+        """Check if running in demo mode."""
+        return settings.demo_mode
+    
+    @property
     def is_configured(self) -> bool:
         """Check if the API is properly configured."""
         return bool(self.base_url)
+    
+    def requires_api(self) -> bool:
+        """Check if real API is required and not available."""
+        if self.is_demo_mode:
+            return False
+        return not self.is_configured
     
     async def _get_headers(self) -> Dict[str, str]:
         """Get request headers with captcha token if available."""
@@ -76,9 +89,17 @@ class GiftCodeClient:
         Returns:
             Validation result with status
         """
+        # Check if API is required
+        if self.requires_api():
+            return {
+                "status": GiftCodeStatus.FAILED,
+                "error": "GIFT_CODE_API_BASE_URL not configured and WOSM_DEMO_MODE is false",
+                "production_error": True
+            }
+        
         if not self.is_configured():
-            # For demo/testing: simulate validation based on code format
-            logger.warning("Gift code API not configured, using simulation mode")
+            # Demo mode: simulate validation
+            logger.warning("DEMO MODE - Using simulation for code validation")
             return self._simulate_validate(code)
         
         try:
@@ -116,38 +137,51 @@ class GiftCodeClient:
     def _simulate_validate(self, code: str) -> Dict[str, Any]:
         """
         Simulate code validation for testing/demo purposes.
-        
-        Valid codes format: TEST123, DEMO456, GIFT789
+        IMPORTANT: Results are marked as DEMO MODE.
         """
         import re
         pattern = re.compile(r'^[A-Z0-9]{6,32}$')
         
         if not pattern.match(code):
-            return {"status": GiftCodeStatus.INVALID, "error": "Invalid code format"}
+            return {
+                "status": GiftCodeStatus.INVALID,
+                "error": "Invalid code format",
+                "demo_mode": True
+            }
         
         # Simulate some codes as valid, others as invalid
         if code.upper().startswith(('TEST', 'DEMO', 'GIFT', 'WOS', 'FREE')):
             return {
                 "status": GiftCodeStatus.VALID,
                 "rewards": ["coins", "gems", "resources"],
-                "expires_at": None
+                "expires_at": None,
+                "demo_mode": True,
+                "demo_warning": "DEMO MODE - NOT REAL REDEMPTION"
             }
         elif code.upper().startswith('EXP'):
-            return {"status": GiftCodeStatus.EXPIRED}
+            return {"status": GiftCodeStatus.EXPIRED, "demo_mode": True}
         elif code.upper().startswith('USED'):
-            return {"status": GiftCodeStatus.ALREADY_REDEEMED}
+            return {"status": GiftCodeStatus.ALREADY_REDEEMED, "demo_mode": True}
         else:
-            return {"status": GiftCodeStatus.VALID}
+            return {
+                "status": GiftCodeStatus.VALID,
+                "demo_mode": True,
+                "demo_warning": "DEMO MODE - NOT REAL REDEMPTION"
+            }
     
     def _simulate_redeem(self, code: str, fid: str) -> Dict[str, Any]:
-        """Simulate code redemption for testing/demo."""
+        """
+        Simulate code redemption for testing/demo.
+        IMPORTANT: Results are marked as DEMO MODE.
+        """
         if not fid or len(fid) < 3:
             return {"status": GiftCodeStatus.INVALID, "error": "Invalid FID"}
         
-        # Check if FID already used this code (simulate)
         return {
             "status": GiftCodeStatus.REDEEMED,
-            "rewards": ["1000 coins", "50 gems"]
+            "rewards": ["1000 coins", "50 gems"],
+            "demo_mode": True,
+            "demo_warning": "DEMO MODE - NOT REAL REDEMPTION"
         }
     
     async def redeem_code(
@@ -167,13 +201,21 @@ class GiftCodeClient:
         Returns:
             Redemption result
         """
+        # Check if API is required
+        if self.requires_api():
+            return {
+                "status": GiftCodeStatus.FAILED,
+                "error": "GIFT_CODE_API_BASE_URL not configured and WOSM_DEMO_MODE is false",
+                "production_error": True
+            }
+        
         # Use provided captcha or stored one
         token = captcha_token or self._captcha_token
         if token:
             self.set_captcha_token(token)
         
         if not self.is_configured():
-            logger.warning("Gift code API not configured, using simulation mode")
+            logger.warning("DEMO MODE - Using simulation for code redemption")
             return self._simulate_redeem(code, fid)
         
         try:
@@ -234,9 +276,24 @@ class GiftCodeClient:
         Returns:
             True if captcha is required
         """
-        # For demo: only codes starting with CAPTCHA require captcha
-        if code.upper().startswith('CAPTCHA'):
-            return True
+        if not settings.has_captcha_service:
+            # Check if API requires captcha
+            if self.is_configured():
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(
+                            f"{self.base_url}/captcha-required/{code}",
+                            timeout=aiohttp.ClientTimeout(total=5)
+                        ) as response:
+                            if response.status == 200:
+                                data = await response.json()
+                                return data.get("required", False)
+                except:
+                    pass
+            
+            # Demo mode: only codes starting with CAPTCHA require captcha
+            if code.upper().startswith('CAPTCHA'):
+                return True
         return False
     
     async def batch_validate(self, codes: List[str]) -> Dict[str, Dict[str, Any]]:
@@ -249,13 +306,18 @@ class GiftCodeClient:
         Returns:
             Dictionary mapping code to validation result
         """
+        if self.requires_api():
+            return {
+                code: {
+                    "status": GiftCodeStatus.FAILED,
+                    "error": "GIFT_CODE_API_BASE_URL not configured",
+                    "production_error": True
+                }
+                for code in codes
+            }
+        
         results = {}
-        tasks = []
         
-        for code in codes:
-            tasks.append(self.validate_code(code))
-        
-        # Run validations concurrently with rate limiting
         for i, code in enumerate(codes):
             results[code] = await self.validate_code(code)
             if i < len(codes) - 1:
@@ -280,13 +342,21 @@ class GiftCodeClient:
         Returns:
             Batch redemption results
         """
+        if self.requires_api():
+            return {
+                "code": code,
+                "error": "GIFT_CODE_API_BASE_URL not configured",
+                "production_error": True
+            }
+        
         results = {
             "code": code,
             "total": len(fids),
             "success": 0,
             "failed": 0,
             "requires_captcha": False,
-            "details": []
+            "details": [],
+            "demo_mode": self.is_demo_mode
         }
         
         for i, fid in enumerate(fids):
@@ -324,11 +394,27 @@ class GiftCodeClient:
         results["completed"] = results["success"] + results["failed"]
         return results
     
-    async def health_check(self) -> bool:
-        """Check if API is healthy."""
+    async def health_check(self) -> Dict[str, Any]:
+        """
+        Check if API is healthy.
+        
+        Returns:
+            Health status with details
+        """
+        if self.is_demo_mode:
+            return {
+                "healthy": True,
+                "mode": "demo",
+                "message": "Running in DEMO MODE - Using simulation"
+            }
+        
         if not self.is_configured():
-            # In simulation mode, always return True
-            return True
+            return {
+                "healthy": False,
+                "mode": "production",
+                "error": "GIFT_CODE_API_BASE_URL not configured",
+                "message": "PRODUCTION ERROR: Gift Code API not available"
+            }
         
         try:
             async with aiohttp.ClientSession() as session:
@@ -336,9 +422,26 @@ class GiftCodeClient:
                     f"{self.base_url}/health",
                     timeout=aiohttp.ClientTimeout(total=5)
                 ) as response:
-                    return response.status == 200
-        except:
-            return False
+                    if response.status == 200:
+                        return {
+                            "healthy": True,
+                            "mode": "production",
+                            "message": "Gift Code API connected"
+                        }
+                    else:
+                        return {
+                            "healthy": False,
+                            "mode": "production",
+                            "error": f"HTTP {response.status}",
+                            "message": "Gift Code API unhealthy"
+                        }
+        except Exception as e:
+            return {
+                "healthy": False,
+                "mode": "production",
+                "error": str(e),
+                "message": "Gift Code API unreachable"
+            }
 
 
 gift_code_client = GiftCodeClient()

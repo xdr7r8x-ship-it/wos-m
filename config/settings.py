@@ -38,6 +38,7 @@ class APIConfig:
     wos_api_base_url: str = ""
     gift_code_api_base_url: str = ""
     captcha_service_url: str = ""
+    captcha_service_token: str = ""
     ocr_service_url: str = ""
     request_timeout: int = 30
     rate_limit_calls: int = 10
@@ -83,6 +84,24 @@ class Settings:
     theme_color_info: int = 0x1abc9c
     theme_embed_footer: str = "WOS-M"
     
+    # Demo mode - MUST BE FALSE for production
+    demo_mode: bool = False
+    
+    @property
+    def is_production(self) -> bool:
+        """Check if running in production mode."""
+        return not self.demo_mode
+    
+    @property
+    def has_gift_api(self) -> bool:
+        """Check if Gift Code API is configured."""
+        return bool(self.api.gift_code_api_base_url)
+    
+    @property
+    def has_captcha_service(self) -> bool:
+        """Check if Captcha service is configured."""
+        return bool(self.api.captcha_service_url and self.api.captcha_service_token)
+    
     @classmethod
     def load_from_env(cls) -> "Settings":
         """Load settings from environment variables."""
@@ -99,7 +118,12 @@ class Settings:
         settings.api.wos_api_base_url = os.getenv("WOS_API_BASE_URL", "")
         settings.api.gift_code_api_base_url = os.getenv("GIFT_CODE_API_BASE_URL", "")
         settings.api.captcha_service_url = os.getenv("CAPTCHA_SERVICE_URL", "")
+        settings.api.captcha_service_token = os.getenv("CAPTCHA_SERVICE_TOKEN", "")
         settings.api.ocr_service_url = os.getenv("OCR_SERVICE_URL", "")
+        
+        # Demo mode - must be explicitly enabled
+        demo_mode_str = os.getenv("WOSM_DEMO_MODE", "false").lower()
+        settings.demo_mode = demo_mode_str == "true"
         
         settings.logging.level = os.getenv("LOG_LEVEL", settings.logging.level)
         settings.default_language = os.getenv("DEFAULT_LANGUAGE", settings.default_language)
