@@ -33,6 +33,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from config.settings import settings
+from integrations.browser_headers import get_headers
 
 logger = logging.getLogger(__name__)
 
@@ -142,22 +143,7 @@ class WhiteoutProjectProvider:
             logger.warning("ddddorc not installed")
             self._ocr_available = False
     
-    def _get_browser_headers(self, referer: str = "") -> Dict[str, str]:
-        """Get browser-like headers (from whiteout-project/bot patterns)."""
-        headers = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Connection": "keep-alive",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        }
-        if referer:
-            headers["Referer"] = referer
-        return headers
+
     
     def is_configured(self) -> bool:
         """Check if provider is configured for redemption."""
@@ -199,9 +185,9 @@ class WhiteoutProjectProvider:
         param_string += self.sign_secret
         return hashlib.md5(param_string.encode()).hexdigest()
     
-    def _get_headers(self) -> Dict[str, str]:
-        """Get request headers."""
-        headers = self._get_browser_headers()
+    def _get_headers(self, origin: str = "") -> Dict[str, str]:
+        """Get request headers with browser randomization."""
+        headers = get_headers(origin) if origin else get_headers()
         
         if self.api_key:
             headers["X-API-Key"] = self.api_key
