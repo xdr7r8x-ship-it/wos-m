@@ -49,6 +49,8 @@ class APIConfig:
     external_provider_name: str = "WoSTools"
     external_provider_login_token: str = ""  # Set at runtime only
     external_provider_sign_secret: str = ""   # Optional custom sign salt
+    external_provider_cookie: str = ""         # Optional cookie
+    external_provider_session: str = ""       # Optional session ID
     request_timeout: int = 30
     rate_limit_calls: int = 10
     rate_limit_period: int = 60
@@ -143,6 +145,8 @@ class Settings:
         # Note: EXTERNAL_PROVIDER_LOGIN_TOKEN should NEVER be committed to git
         # It must be set via environment variable at runtime
         settings.api.external_provider_login_token = os.getenv("EXTERNAL_PROVIDER_LOGIN_TOKEN", "")
+        settings.api.external_provider_cookie = os.getenv("EXTERNAL_PROVIDER_COOKIE", "")
+        settings.api.external_provider_session = os.getenv("EXTERNAL_PROVIDER_SESSION", "")
         
         # Demo mode - must be explicitly enabled
         demo_mode_str = os.getenv("WOSM_DEMO_MODE", "false").lower()
