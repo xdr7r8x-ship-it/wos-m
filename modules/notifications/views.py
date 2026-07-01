@@ -103,56 +103,7 @@ async def notifications_callback(bot: WOSMBot, interaction: discord.Interaction)
     )
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
 
-async def notif_add_callback(bot, interaction):
-    """Handle notif_add button."""
-    # TODO: Implement notif_add functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def notif_delete_callback(bot, interaction):
-    """Handle notif_delete button."""
-    # TODO: Implement notif_delete functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def notif_disable_callback(bot, interaction):
-    """Handle notif_disable button."""
-    # TODO: Implement notif_disable functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def notif_edit_callback(bot, interaction):
-    """Handle notif_edit button."""
-    # TODO: Implement notif_edit functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def notif_enable_callback(bot, interaction):
-    """Handle notif_enable button."""
-    # TODO: Implement notif_enable functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def notif_list_callback(bot, interaction):
-    """Handle notif_list button."""
-    # TODO: Implement notif_list functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 

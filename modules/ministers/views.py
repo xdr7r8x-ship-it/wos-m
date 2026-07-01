@@ -95,48 +95,6 @@ async def ministers_callback(bot: WOSMBot, interaction: discord.Interaction):
     )
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
 
-async def minister_add_callback(bot, interaction):
-    """Handle minister_add button."""
-    # TODO: Implement minister_add functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def minister_assign_callback(bot, interaction):
-    """Handle minister_assign button."""
-    # TODO: Implement minister_assign functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def minister_list_callback(bot, interaction):
-    """Handle minister_list button."""
-    # TODO: Implement minister_list functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def minister_reminder_callback(bot, interaction):
-    """Handle minister_reminder button."""
-    # TODO: Implement minister_reminder functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def minister_schedule_callback(bot, interaction):
-    """Handle minister_schedule button."""
-    # TODO: Implement minister_schedule functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 

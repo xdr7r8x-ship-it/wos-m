@@ -150,40 +150,5 @@ async def list_events_callback(bot: WOSMBot, interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
 
-async def event_create_callback(bot, interaction):
-    """Handle event_create button."""
-    # TODO: Implement event_create functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def event_delete_callback(bot, interaction):
-    """Handle event_delete button."""
-    # TODO: Implement event_delete functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def event_edit_callback(bot, interaction):
-    """Handle event_edit button."""
-    # TODO: Implement event_edit functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def event_list_callback(bot, interaction):
-    """Handle event_list button."""
-    # TODO: Implement event_list functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 

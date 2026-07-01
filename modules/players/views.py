@@ -3,6 +3,9 @@ WOS-M Players Module
 © MANSOUR — WOS-M. All rights reserved.
 """
 import discord
+import csv
+import io
+import json
 from typing import Dict, Any, List, Optional
 
 from core.bot import WOSMBot
@@ -144,31 +147,105 @@ async def players_callback(bot: WOSMBot, interaction: discord.Interaction):
     )
 
 
-async def add_player_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Callback for adding player."""
-    modal = PlayerModal(mode="add")
-    await interaction.response.send_modal(modal)
+def validate_fid(fid: str) -> bool:
+    """Validate FID format (8-11 digits)."""
+    if not fid:
+        return False
+    fid_clean = fid.strip()
+    return fid_clean.isdigit() and 8 <= len(fid_clean) <= 11
+
+
+async def player_add_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_add button - Add a new player."""
+    guard = PermissionGuard(bot)
     
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ADMIN):
+        await interaction.response.send_message(
+            "❌ ليس لديك صلاحية إضافة لاعبين.",
+            ephemeral=True
+        )
+        return
+    
+    modal = discord.ui.Modal(title="➕ إضافة لاعب")
+    
+    fid_input = discord.ui.TextInput(
+        label="FID اللاعب",
+        placeholder="12345678",
+        required=True,
+        min_length=8,
+        max_length=11
+    )
+    
+    name_input = discord.ui.TextInput(
+        label="اسم اللاعب",
+        placeholder="Player Name",
+        required=True,
+        min_length=1,
+        max_length=50
+    )
+    
+    alliance_select = discord.ui.TextInput(
+        label="ID التحالف (اختياري)",
+        placeholder="اتركه فارغاً إذا لا يوجد",
+        required=False
+    )
+    
+    modal.add_item(fid_input)
+    modal.add_item(name_input)
+    modal.add_item(alliance_select)
+    
+    await interaction.response.send_modal(modal)
     await modal.wait()
     
-    fid = modal.fid_input.value.strip()
-    name = modal.name_input.value.strip()
-    level = int(modal.level_input.value) if modal.level_input.value else 1
+    fid = fid_input.value.strip()
+    name = name_input.value.strip()
+    alliance_id = alliance_select.value.strip() if alliance_select.value else None
+    
+    # Validate FID
+    if not validate_fid(fid):
+        await interaction.followup.send(
+            "❌ FID غير صالح. يجب أن يكون 8-11 أرقام.",
+            ephemeral=True
+        )
+        return
     
     try:
+        # Check if player already exists
+        existing = await db.fetchone("SELECT id FROM players WHERE fid = ?", (fid,))
+        if existing:
+            await interaction.followup.send(
+                f"❌ اللاعب `{fid}` موجود بالفعل.",
+                ephemeral=True
+            )
+            return
+        
+        # Try to lookup player from API
+        player_info = None
+        try:
+            success, data, msg = await wos_api_client.get_player(fid)
+            if success and data:
+                player_info = data
+        except:
+            pass
+        
+        # Insert player
         cursor = await db.execute(
-            """INSERT INTO players (fid, name, level) VALUES (?, ?, ?)""",
-            (fid, name, level)
+            """INSERT INTO players (fid, name, level, alliance_id) VALUES (?, ?, ?, ?)""",
+            (fid, name, player_info.get("level", 1) if player_info else 1, alliance_id)
         )
         await db.commit()
         player_id = cursor.lastrowid
         
-        await interaction.followup.send(
-            f"✅ {i18n.get('messages.success')}\n"
-            f"**FID:** `{fid}`\n"
-            f"**Name:** {name}",
-            ephemeral=True
+        embed = discord.Embed(
+            title="✅ تم إضافة اللاعب",
+            color=0x2ecc71
         )
+        embed.add_field(name="FID", value=f"`{fid}`", inline=True)
+        embed.add_field(name="الاسم", value=name, inline=True)
+        if player_info:
+            embed.add_field(name="المستوى", value=str(player_info.get("level", 1)), inline=True)
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
         
         await audit_log.log(
             user_id=str(interaction.user.id),
@@ -180,42 +257,28 @@ async def add_player_callback(bot: WOSMBot, interaction: discord.Interaction):
         
     except Exception as e:
         await interaction.followup.send(
-            f"❌ {i18n.get('messages.error')}: {str(e)}",
+            "❌ حدث خطأ أثناء إضافة اللاعب. تم تسجيل التفاصيل.",
             ephemeral=True
         )
 
 
-async def list_players_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Callback for listing players."""
-    view = PlayersListView(bot, interaction.user.id)
-    await view.load_players()
-    
-    if not view.items:
-        await interaction.response.send_message(
-            i18n.get("messages.no_results"),
-            ephemeral=True
-        )
-        return
-    
-    embed = view.create_embed()
-    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-
-
-async def search_player_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Callback for searching player."""
-    # Create search modal
-    modal = discord.ui.Modal(title=i18n.get("players.search_player"))
+async def player_search_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_search button - Search for a player."""
+    modal = discord.ui.Modal(title="🔍 بحث عن لاعب")
     
     fid_input = discord.ui.TextInput(
-        label=i18n.get("players.fid"),
-        placeholder="Enter FID",
-        required=False
+        label="FID اللاعب",
+        placeholder="اتركه فارغاً للبحث بالاسم",
+        required=False,
+        min_length=8,
+        max_length=11
     )
     
     name_input = discord.ui.TextInput(
-        label=i18n.get("players.player_name"),
-        placeholder="Enter player name",
-        required=False
+        label="اسم اللاعب",
+        placeholder="اكتب جزء من الاسم",
+        required=False,
+        min_length=1
     )
     
     modal.add_item(fid_input)
@@ -224,93 +287,381 @@ async def search_player_callback(bot: WOSMBot, interaction: discord.Interaction)
     await interaction.response.send_modal(modal)
     await modal.wait()
     
-    query = "SELECT p.*, a.name as alliance_name FROM players p LEFT JOIN alliances a ON p.alliance_id = a.id WHERE 1=1"
+    query = """SELECT p.*, a.name as alliance_name 
+               FROM players p 
+               LEFT JOIN alliances a ON p.alliance_id = a.id 
+               WHERE 1=1"""
     params = []
     
     if fid_input.value:
-        query += " AND p.fid LIKE ?"
-        params.append(f"%{fid_input.value}%")
+        if not validate_fid(fid_input.value):
+            await interaction.followup.send(
+                "❌ FID غير صالح.",
+                ephemeral=True
+            )
+            return
+        query += " AND p.fid = ?"
+        params.append(fid_input.value.strip())
     
     if name_input.value:
         query += " AND p.name LIKE ?"
-        params.append(f"%{name_input.value}%")
+        params.append(f"%{name_input.value.strip()}%")
     
-    rows = await db.fetchall(query, tuple(params))
-    
-    if not rows:
+    if not fid_input.value and not name_input.value:
         await interaction.followup.send(
-            i18n.get("messages.no_results"),
+            "❌ أدخل FID أو اسم اللاعب.",
             ephemeral=True
         )
         return
     
-    embed = discord.Embed(
-        title=f"🔍 {i18n.get('players.search_player')}",
-        color=0x3498db
-    )
+    query += " ORDER BY p.name LIMIT 20"
     
-    for row in rows[:10]:
-        embed.add_field(
-            name=row["name"],
-            value=f"**FID:** `{row['fid']}`\n"
-                  f"**Level:** {row.get('level', 1)}\n"
-                  f"**Alliance:** {row.get('alliance_name', 'N/A')}",
-            inline=True
+    try:
+        rows = await db.fetchall(query, tuple(params))
+        
+        if not rows:
+            await interaction.followup.send(
+                "❌ لم يتم العثور على نتائج.",
+                ephemeral=True
+            )
+            return
+        
+        embed = discord.Embed(
+            title=f"🔍 النتائج ({len(rows)})",
+            color=0x3498db
         )
+        
+        for row in rows:
+            embed.add_field(
+                name=f"{row['name']}",
+                value=f"**FID:** `{row['fid']}`\n"
+                      f"**المستوى:** {row.get('level', 'N/A')}\n"
+                      f"**التحالف:** {row.get('alliance_name', 'بدون')}",
+                inline=False
+            )
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+        
+    except Exception as e:
+        await interaction.followup.send(
+            "❌ حدث خطأ أثناء البحث. تم تسجيل التفاصيل.",
+            ephemeral=True
+        )
+
+
+async def player_list_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_list button - List all players."""
+    guard = PermissionGuard(bot)
     
-    await interaction.followup.send(embed=embed, ephemeral=True)
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.MEMBER):
+        await interaction.response.send_message(
+            "❌ ليس لديك صلاحية عرض اللاعبين.",
+            ephemeral=True
+        )
+        return
+    
+    try:
+        rows = await db.fetchall(
+            """SELECT p.*, a.name as alliance_name 
+               FROM players p 
+               LEFT JOIN alliances a ON p.alliance_id = a.id 
+               ORDER BY p.name LIMIT 100"""
+        )
+        
+        if not rows:
+            await interaction.response.send_message(
+                "📋 لا يوجد لاعبون مسجلون.",
+                ephemeral=True
+            )
+            return
+        
+        view = PlayersListView(bot, interaction.user.id)
+        view.items = [dict(row) for row in rows]
+        view._total_pages = max(1, (len(view.items) + view.items_per_page - 1) // view.items_per_page)
+        view._update_buttons()
+        
+        embed = view.create_embed()
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        
+    except Exception as e:
+        await interaction.response.send_message(
+            "❌ حدث خطأ أثناء تحميل اللاعبين. تم تسجيل التفاصيل.",
+            ephemeral=True
+        )
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
-
-async def player_add_callback(bot, interaction):
-    """Handle player_add button."""
-    # TODO: Implement player_add functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
+async def player_sync_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_sync button - Sync player data from API."""
+    guard = PermissionGuard(bot)
+    
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ADMIN):
+        await interaction.response.send_message(
+            "❌ ليس لديك صلاحية مزامنة اللاعبين.",
+            ephemeral=True
+        )
+        return
+    
+    modal = discord.ui.Modal(title="🔄 مزامنة بيانات اللاعب")
+    
+    fid_input = discord.ui.TextInput(
+        label="FID اللاعب",
+        placeholder="12345678",
+        required=True,
+        min_length=8,
+        max_length=11
     )
+    
+    modal.add_item(fid_input)
+    
+    await interaction.response.send_modal(modal)
+    await modal.wait()
+    
+    fid = fid_input.value.strip()
+    
+    if not validate_fid(fid):
+        await interaction.followup.send(
+            "❌ FID غير صالح.",
+            ephemeral=True
+        )
+        return
+    
+    try:
+        # Lookup player from API
+        success, player_info, msg = await wos_api_client.get_player(fid)
+        
+        if not success or not player_info:
+            await interaction.followup.send(
+                f"❌ لم يتم العثور على اللاعب: {msg}",
+                ephemeral=True
+            )
+            return
+        
+        # Update player in database
+        await db.execute(
+            """UPDATE players SET 
+               name = COALESCE(?, name),
+               level = COALESCE(?, level)
+               WHERE fid = ?""",
+            (player_info.get("name"), player_info.get("level"), fid)
+        )
+        await db.commit()
+        
+        embed = discord.Embed(
+            title="✅ تم مزامنة البيانات",
+            color=0x2ecc71
+        )
+        embed.add_field(name="FID", value=f"`{fid}`", inline=True)
+        embed.add_field(name="الاسم", value=player_info.get("name", "N/A"), inline=True)
+        embed.add_field(name="المستوى", value=str(player_info.get("level", "N/A")), inline=True)
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+        
+        await audit_log.log(
+            user_id=str(interaction.user.id),
+            user_name=str(interaction.user),
+            action="sync_player",
+            category=AuditCategory.PLAYERS,
+            details={"fid": fid}
+        )
+        
+    except Exception as e:
+        await interaction.followup.send(
+            "❌ حدث خطأ أثناء المزامنة. تم تسجيل التفاصيل.",
+            ephemeral=True
+        )
 
-async def player_export_callback(bot, interaction):
-    """Handle player_export button."""
-    # TODO: Implement player_export functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def player_list_callback(bot, interaction):
-    """Handle player_list button."""
-    # TODO: Implement player_list functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
+async def player_move_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_move button - Move player between alliances."""
+    guard = PermissionGuard(bot)
+    
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ADMIN):
+        await interaction.response.send_message(
+            "❌ ليس لديك صلاحية نقل اللاعبين.",
+            ephemeral=True
+        )
+        return
+    
+    modal = discord.ui.Modal(title="➡️ نقل لاعب لتحالف")
+    
+    fid_input = discord.ui.TextInput(
+        label="FID اللاعب",
+        placeholder="12345678",
+        required=True,
+        min_length=8,
+        max_length=11
     )
+    
+    alliance_input = discord.ui.TextInput(
+        label="ID التحالف الجديد",
+        placeholder="اتركه فارغاً لإزالة اللاعب من تحالفه",
+        required=False
+    )
+    
+    modal.add_item(fid_input)
+    modal.add_item(alliance_input)
+    
+    await interaction.response.send_modal(modal)
+    await modal.wait()
+    
+    fid = fid_input.value.strip()
+    alliance_id = alliance_input.value.strip() if alliance_input.value else None
+    
+    if not validate_fid(fid):
+        await interaction.followup.send(
+            "❌ FID غير صالح.",
+            ephemeral=True
+        )
+        return
+    
+    try:
+        # Check if player exists
+        player = await db.fetchone("SELECT * FROM players WHERE fid = ?", (fid,))
+        if not player:
+            await interaction.followup.send(
+                f"❌ اللاعب `{fid}` غير موجود.",
+                ephemeral=True
+            )
+            return
+        
+        # Verify alliance if specified
+        if alliance_id:
+            alliance = await db.fetchone("SELECT * FROM alliances WHERE id = ?", (alliance_id,))
+            if not alliance:
+                await interaction.followup.send(
+                    f"❌ التحالف `{alliance_id}` غير موجود.",
+                    ephemeral=True
+                )
+                return
+        
+        # Update player
+        await db.execute(
+            "UPDATE players SET alliance_id = ? WHERE fid = ?",
+            (alliance_id, fid)
+        )
+        await db.commit()
+        
+        alliance_name = "تم الإزالة"
+        if alliance_id:
+            alliance = await db.fetchone("SELECT name FROM alliances WHERE id = ?", (alliance_id,))
+            alliance_name = alliance["name"] if alliance else alliance_id
+        
+        embed = discord.Embed(
+            title="✅ تم نقل اللاعب",
+            color=0x2ecc71
+        )
+        embed.add_field(name="FID", value=f"`{fid}`", inline=True)
+        embed.add_field(name="التحالف الجديد", value=alliance_name, inline=True)
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+        
+        await audit_log.log(
+            user_id=str(interaction.user.id),
+            user_name=str(interaction.user),
+            action="move_player",
+            category=AuditCategory.PLAYERS,
+            details={"fid": fid, "new_alliance_id": alliance_id}
+        )
+        
+    except Exception as e:
+        await interaction.followup.send(
+            "❌ حدث خطأ أثناء نقل اللاعب. تم تسجيل التفاصيل.",
+            ephemeral=True
+        )
 
-async def player_move_callback(bot, interaction):
-    """Handle player_move button."""
-    # TODO: Implement player_move functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def player_search_callback(bot, interaction):
-    """Handle player_search button."""
-    # TODO: Implement player_search functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
+async def player_export_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_export button - Export players to CSV/JSON."""
+    guard = PermissionGuard(bot)
+    
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ADMIN):
+        await interaction.response.send_message(
+            "❌ ليس لديك صلاحية تصدير اللاعبين.",
+            ephemeral=True
+        )
+        return
+    
+    try:
+        rows = await db.fetchall(
+            """SELECT p.fid, p.name, p.level, a.name as alliance_name
+               FROM players p 
+               LEFT JOIN alliances a ON p.alliance_id = a.id 
+               ORDER BY p.name"""
+        )
+        
+        if not rows:
+            await interaction.response.send_message(
+                "❌ لا يوجد لاعبون للتصدير.",
+                ephemeral=True
+            )
+            return
+        
+        # Create CSV
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["FID", "Name", "Level", "Alliance"])
+        
+        for row in rows:
+            writer.writerow([row["fid"], row["name"], row.get("level", ""), row.get("alliance_name", "")])
+        
+        csv_content = output.getvalue()
+        output.close()
+        
+        # Create JSON
+        players = []
+        for row in rows:
+            players.append({
+                "fid": row["fid"],
+                "name": row["name"],
+                "level": row.get("level"),
+                "alliance": row.get("alliance_name")
+            })
+        
+        json_content = json.dumps(players, indent=2, ensure_ascii=False)
+        
+        # Send files
+        await interaction.response.send_message(
+            "📤 تصدير اللاعبين:",
+            ephemeral=True
+        )
+        
+        await interaction.followup.send(
+            file=discord.File(
+                io.BytesIO(csv_content.encode()),
+                filename="players.csv"
+            ),
+            ephemeral=True
+        )
+        
+        await interaction.followup.send(
+            file=discord.File(
+                io.BytesIO(json_content.encode()),
+                filename="players.json"
+            ),
+            ephemeral=True
+        )
+        
+        await audit_log.log(
+            user_id=str(interaction.user.id),
+            user_name=str(interaction.user),
+            action="export_players",
+            category=AuditCategory.PLAYERS,
+            details={"count": len(rows)}
+        )
+        
+    except Exception as e:
+        await interaction.followup.send(
+            "❌ حدث خطأ أثناء التصدير. تم تسجيل التفاصيل.",
+            ephemeral=True
+        )
 
-async def player_sync_callback(bot, interaction):
-    """Handle player_sync button."""
-    # TODO: Implement player_sync functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
+
+async def player_select_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Handle player_select from select menu."""
+    if interaction.data.get("values"):
+        selected_fid = interaction.data["values"][0]
+        await interaction.response.send_message(
+            f"✅ تم اختيار اللاعب: `{selected_fid}`",
+            ephemeral=True
+        )
 

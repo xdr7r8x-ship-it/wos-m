@@ -278,128 +278,16 @@ async def settings_callback(bot: WOSMBot, interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
 
-async def maint_api_callback(bot, interaction):
-    """Handle maint_api button."""
-    # TODO: Implement maint_api functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def maint_backup_callback(bot, interaction):
-    """Handle maint_backup button."""
-    # TODO: Implement maint_backup functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def maint_database_callback(bot, interaction):
-    """Handle maint_database button."""
-    # TODO: Implement maint_database functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def maint_health_callback(bot, interaction):
-    """Handle maint_health button."""
-    # TODO: Implement maint_health functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def maint_logs_callback(bot, interaction):
-    """Handle maint_logs button."""
-    # TODO: Implement maint_logs functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def maint_queue_callback(bot, interaction):
-    """Handle maint_queue button."""
-    # TODO: Implement maint_queue functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def perm_assign_callback(bot, interaction):
-    """Handle perm_assign button."""
-    # TODO: Implement perm_assign functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def perm_audit_callback(bot, interaction):
-    """Handle perm_audit button."""
-    # TODO: Implement perm_audit functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def perm_list_callback(bot, interaction):
-    """Handle perm_list button."""
-    # TODO: Implement perm_list functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def perm_remove_callback(bot, interaction):
-    """Handle perm_remove button."""
-    # TODO: Implement perm_remove functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def perm_transfer_callback(bot, interaction):
-    """Handle perm_transfer button."""
-    # TODO: Implement perm_transfer functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def settings_api_callback(bot, interaction):
-    """Handle settings_api button."""
-    # TODO: Implement settings_api functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def settings_general_callback(bot, interaction):
-    """Handle settings_general button."""
-    # TODO: Implement settings_general functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def settings_reset_callback(bot, interaction):
-    """Handle settings_reset button."""
-    # TODO: Implement settings_reset functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def settings_save_callback(bot, interaction):
-    """Handle settings_save button."""
-    # TODO: Implement settings_save functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 

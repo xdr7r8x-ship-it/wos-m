@@ -147,48 +147,6 @@ async def attendance_list_callback(bot: WOSMBot, interaction: discord.Interactio
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
 
-async def att_export_callback(bot, interaction):
-    """Handle att_export button."""
-    # TODO: Implement att_export functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def att_history_callback(bot, interaction):
-    """Handle att_history button."""
-    # TODO: Implement att_history functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def att_list_callback(bot, interaction):
-    """Handle att_list button."""
-    # TODO: Implement att_list functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def att_record_callback(bot, interaction):
-    """Handle att_record button."""
-    # TODO: Implement att_record functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def att_report_callback(bot, interaction):
-    """Handle att_report button."""
-    # TODO: Implement att_report functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 

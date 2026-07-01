@@ -103,56 +103,7 @@ async def themes_callback(bot: WOSMBot, interaction: discord.Interaction):
     )
 
 
-# =============================================================================
-# Callback stubs for dynamic routing
-# Called by bot.py's _route_to_module
-# =============================================================================
 
-async def theme_bot_name_callback(bot, interaction):
-    """Handle theme_bot_name button."""
-    # TODO: Implement theme_bot_name functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def theme_footer_callback(bot, interaction):
-    """Handle theme_footer button."""
-    # TODO: Implement theme_footer functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
-async def theme_preview_callback(bot, interaction):
-    """Handle theme_preview button."""
-    # TODO: Implement theme_preview functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def theme_primary_color_callback(bot, interaction):
-    """Handle theme_primary_color button."""
-    # TODO: Implement theme_primary_color functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def theme_reset_callback(bot, interaction):
-    """Handle theme_reset button."""
-    # TODO: Implement theme_reset functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
-
-async def theme_signature_callback(bot, interaction):
-    """Handle theme_signature button."""
-    # TODO: Implement theme_signature functionality
-    await interaction.response.send_message(
-        "⚠️ هذه الميزة قيد التطوير.",
-        ephemeral=True
-    )
 
