@@ -1,50 +1,58 @@
 # WOS-M
-### Advanced Whiteout Survival Management Bot
+### Whiteout Survival Management Bot
 
 ![WOS-M Banner](assets/banner.png)
 
 ## 🎮 Overview
 
-WOS-M is a comprehensive Discord bot designed for Whiteout Survival game management, featuring alliance management, player tracking, gift code redemption, event management, and more.
+**WOS-M** (Whiteout Survival Management Bot) is a production-grade Discord bot designed for Whiteout Survival game management, featuring:
+
+- **Real Gift Code Redemption** via WhiteoutProject API
+- **ONNX Captcha Solver** (~97.9% accuracy)
+- **Alliance Management** with auto-redeem
+- **Player Management** with FID lookup
+- **Process Queue** for background tasks
+- **Audit Logging** for security
+- **Multi-language Support** (Arabic/English)
 
 **© MANSOUR — WOS-M. All rights reserved for original code, branding, UI, documentation, custom features, automation systems, and project identity.**
 
 ## ✨ Features
 
-### 📊 Dashboard
+### 🎁 Gift Codes & Real Redemption
+- **Real Redemption** via WhiteoutProject API (centurygame.com)
+- **ONNX Captcha Solver** as primary solver (~97.9% accuracy)
+- **ddddocr** as fallback
+- **Retry Logic** with fresh captcha fetch
+- **Low Confidence Detection** (threshold 0.60)
+- **Rate Limit Backoff** (60-90s)
+- **Per-player/Code Locks**
+- **Batch Redemption** with alliance auto-redeem
+
+### 📊 Dashboard (`/wos`)
 - **Single Command Access**: Everything through `/wos` slash command
 - **Interactive Buttons**: Navigation via buttons, select menus, modals
 - **Multi-language Support**: Full Arabic and English support
 
 ### 🏰 Management Modules
-- **Alliances**: Complete alliance management with sync settings
-- **Players**: Player tracking, FID management, alliance transfers
-- **Gift Codes**: Auto redemption system with batch processing
-- **Events**: Event creation and management
-- **Attendance**: Track player attendance with reports
-- **Bear Tracking**: Hunt damage tracking with leaderboards
-- **Ministers**: Position management and scheduling
-- **Notifications**: Scheduled notifications system
+- **Alliances**: Complete alliance management with auto-redeem settings
+- **Players**: Player tracking, FID lookup, alliance transfers
+- **Events**: Event creation and reminders
+- **Notifications**: Scheduled notifications with role mentions
 
-### 👑 Owner Panel
-- **Language Management**: Switch between Arabic and English
-- **Button Management**: Customize dashboard buttons
-- **Text Management**: Edit all visible texts
-- **Icon Management**: Customize icons and emojis
-- **Branding**: Theme colors, bot name, signature
-- **Feature Registry**: Enable/disable features dynamically
-
-### 🔐 Security
-- **Permission System**: Owner, Admin, Member levels
+### 🔐 Security & Production
+- **Permission System**: Owner, Admin, Leader, R4, Member levels
 - **Audit Logging**: Track all sensitive operations
 - **Permission Guards**: Secure action validation
+- **No Hardcoded Secrets**: All secrets via environment variables
+- **CI/CD**: GitHub Actions for quality checks
 
 ### ⚙️ Technical
 - **Process Queue**: Background task processing with priorities
 - **Feature Registry**: Extensible feature system
-- **SQLite/PostgreSQL**: Database with migration support
-- **Captcha Integration**: Anti-bot protection
-- **OCR Support**: Image text extraction
+- **SQLite Database**: With migration support
+- **ONNX Runtime**: For captcha solving
+- **AsyncIO**: Non-blocking operations
 
 ## 🚀 Quick Start
 
@@ -104,47 +112,40 @@ docker-compose up -d
 
 ```
 wos-m/
-├── main.py              # Entry point
-├── requirements.txt     # Dependencies
+├── main.py                         # Entry point
+├── requirements.txt                # Dependencies
+├── .env.example                   # Environment template
+├── .github/workflows/ci.yml       # CI/CD
 ├── config/
-│   └── settings.py      # Configuration
+│   └── settings.py                # Configuration
 ├── core/
-│   ├── bot.py           # Bot core
-│   ├── database.py      # Database system
-│   ├── i18n.py          # Internationalization
-│   ├── permissions.py   # Permission system
-│   ├── audit_log.py     # Audit logging
-│   ├── process_queue.py # Background tasks
-│   └── feature_registry.py
+│   ├── bot.py                     # Bot core
+│   ├── database.py                # Database system
+│   ├── i18n.py                   # Internationalization
+│   ├── permissions.py            # Permission system
+│   ├── audit_log.py              # Audit logging
+│   ├── process_queue.py          # Background tasks
+│   └── feature_registry.py       # Feature registry
 ├── modules/
-│   ├── dashboard/       # Main dashboard
-│   ├── owner_panel/     # Owner controls
-│   ├── alliances/       # Alliance management
-│   ├── players/         # Player management
-│   ├── gift_codes/      # Gift code system
-│   ├── events/          # Event management
-│   ├── attendance/      # Attendance tracking
-│   ├── bear_tracking/   # Bear hunt tracking
-│   ├── notifications/   # Notification system
-│   ├── ministers/       # Minister management
-│   ├── themes/          # Theme customization
-│   └── maintenance/     # Maintenance tools
+│   ├── dashboard/                # Main dashboard
+│   ├── owner_panel/             # Owner controls
+│   ├── alliances/               # Alliance management
+│   ├── players/                 # Player management
+│   ├── gift_codes/             # Gift code system (Real Redemption)
+│   ├── events/                 # Event management
+│   └── notifications/          # Notifications
 ├── integrations/
-│   ├── wos_api_client.py
-│   ├── gift_code_client.py
-│   ├── captcha_service.py
-│   └── ocr_service.py
-├── views/
-│   ├── base.py          # Base view classes
-│   ├── buttons.py        # Button components
-│   ├── modals.py        # Modal components
-│   └── selects.py       # Select menu components
-├── locales/
-│   ├── ar.json          # Arabic translations
-│   └── en.json          # English translations
-└── database/
-    ├── migrations/
-    └── seed.py           # Initial data
+│   ├── whiteout_project_provider.py   # Real Redemption API
+│   ├── wos_open_source_adapter.py    # Open source API
+│   └── captcha/                       # ONNX Captcha Solver
+│       ├── onnx_captcha_solver.py
+│       └── onnx_lifecycle.py
+├── models/
+│   ├── captcha_model.onnx            # ONNX model
+│   └── captcha_model_metadata.json    # Model config
+├── views/                              # UI components
+├── locales/                            # Translations
+└── database/                          # Migrations
 ```
 
 ## 🎯 Usage
@@ -164,11 +165,25 @@ wos-m/
 Edit `.env` file:
 
 ```env
+# Discord
 DISCORD_BOT_TOKEN=your_bot_token
 DISCORD_APPLICATION_ID=your_app_id
 OWNER_DISCORD_ID=your_user_id
 DEFAULT_LANGUAGE=ar
+
+# Database
 DATABASE_URL=sqlite:///data/wosm.sqlite
+
+# Real Redemption (WhiteoutProject)
+REAL_REDEMPTION_PROVIDER=WhiteoutProject
+EXTERNAL_PROVIDER_API_KEY=your_api_key
+EXTERNAL_PROVIDER_URL=https://wos-giftcode-api.centurygame.com
+
+# ONNX Captcha Solver (optional - uses ddddocr fallback if missing)
+# captcha_model.onnx in models/ directory
+
+# Logging
+LOG_LEVEL=INFO
 ```
 
 ## 📝 License

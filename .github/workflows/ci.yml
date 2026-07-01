@@ -1,0 +1,94 @@
+name: WOS-M CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-checks:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+      
+      - name: Compileall Check
+        run: python -m compileall . -q
+      
+      - name: Run Tests
+        run: python -m pytest tests/ -v --tb=short
+      
+      - name: System Check
+        run: python main.py --check
+  
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Check for hardcoded secrets
+        run: |
+          python -c "
+          import re
+          from pathlib import Path
+          
+          forbidden = ['sk_live_', 'pk_live_', 'api_key_', 'secret_key_', 'ghp_', 'gho_', 'ghs_']
+          found = []
+          
+          for py in Path('.').rglob('*.py'):
+            if 'test' in str(py) or '.venv' in str(py):
+              continue
+            with open(py) as f:
+              for i, line in enumerate(f, 1):
+                for pat in forbidden:
+                  if pat in line and 'os.getenv' not in line and '# ' + pat not in line:
+                    found.append(f'{py}:{i}: {pat}')
+          
+          if found:
+            print('SECRETS FOUND:')
+            for f in found:
+              print(f'  {f}')
+            exit(1)
+          print('No hardcoded secrets found')
+          "
+      
+      - name: Check for placeholders
+        run: |
+          python -c "
+          from pathlib import Path
+          
+          found = []
+          for py in Path('.').rglob('*.py'):
+            if 'test' in str(py) or '.venv' in str(py):
+              continue
+            with open(py) as f:
+              for i, line in enumerate(f, 1):
+                if 'pass  # Placeholder' in line or 'pass # Placeholder' in line:
+                  found.append(f'{py}:{i}')
+          
+          if found:
+            print('PLACEHOLDERS FOUND:')
+            for f in found:
+              print(f'  {f}')
+            exit(1)
+          print('No placeholders found')
+          "
