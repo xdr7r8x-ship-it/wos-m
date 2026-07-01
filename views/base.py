@@ -133,7 +133,33 @@ class PaginationView(BaseView):
         self._current_page = 0
         
         self._update_buttons()
-    
+
+    async def _prev_callback(self, interaction: discord.Interaction):
+        """Handle previous page button."""
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "ليس لديك صلاحية استخدام هذه الأزرار.",
+                ephemeral=True
+            )
+            return
+
+        await self.prev_page()
+        embed = self.create_embed()
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    async def _next_callback(self, interaction: discord.Interaction):
+        """Handle next page button."""
+        if interaction.user.id != self.user_id:
+            await interaction.response.send_message(
+                "ليس لديك صلاحية استخدام هذه الأزرار.",
+                ephemeral=True
+            )
+            return
+
+        await self.next_page()
+        embed = self.create_embed()
+        await interaction.response.edit_message(embed=embed, view=self)
+
     def _update_buttons(self):
         """Update pagination buttons."""
         self.clear_items()
@@ -146,7 +172,8 @@ class PaginationView(BaseView):
             emoji="◀️",
             disabled=self._current_page == 0
         )
-        
+        prev_button.callback = self._prev_callback
+
         # Next button
         next_button = ui.Button(
             label=i18n.get("buttons.next"),
@@ -155,6 +182,7 @@ class PaginationView(BaseView):
             emoji="▶️",
             disabled=self._current_page >= self._total_pages - 1
         )
+        next_button.callback = self._next_callback
         
         # Page indicator
         page_label = f"{i18n.get('messages.page')} {self._current_page + 1} {i18n.get('messages.of')} {self._total_pages}"
