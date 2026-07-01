@@ -241,7 +241,7 @@ class WOSMBot(discord.Client):
             else:
                 logger.warning(f"No handler {handler_name} in {module_name}")
                 await interaction.response.send_message(
-                    "⚠️ هذه الميزة قيد التطوير.",
+                    "⚠️ تعذر تنفيذ هذا الإجراء. يرجى المحاولة مرة أخرى.",
                     ephemeral=True
                 )
         except Exception as e:
@@ -325,7 +325,7 @@ class WOSMBot(discord.Client):
                 logger.warning(f"Unhandled custom_id: {custom_id}")
                 try:
                     await interaction.response.send_message(
-                        "⚠️ هذه الميزة غير مفعّلة.",
+                        "⚠️ تعذر تنفيذ هذا الإجراء. يرجى المحاولة مرة أخرى.",
                         ephemeral=True
                     )
                 except:
