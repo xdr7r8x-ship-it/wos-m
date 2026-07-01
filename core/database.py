@@ -232,6 +232,8 @@ class Database:
                 status TEXT NOT NULL DEFAULT 'pending',
                 redeemed_at TIMESTAMP,
                 error_message TEXT,
+                provider TEXT,
+                api_status TEXT,
                 FOREIGN KEY (code_id) REFERENCES gift_codes(id) ON DELETE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );

@@ -51,6 +51,8 @@ class APIConfig:
     external_provider_sign_secret: str = ""   # Optional custom sign salt
     external_provider_cookie: str = ""         # Optional cookie
     external_provider_session: str = ""       # Optional session ID
+    # Real Redemption Provider selection
+    real_redemption_provider: str = "WhiteoutProject"  # "WhiteoutProject" or "Generic"
     request_timeout: int = 30
     rate_limit_calls: int = 10
     rate_limit_period: int = 60
@@ -147,6 +149,9 @@ class Settings:
         settings.api.external_provider_login_token = os.getenv("EXTERNAL_PROVIDER_LOGIN_TOKEN", "")
         settings.api.external_provider_cookie = os.getenv("EXTERNAL_PROVIDER_COOKIE", "")
         settings.api.external_provider_session = os.getenv("EXTERNAL_PROVIDER_SESSION", "")
+        
+        # Real Redemption Provider selection
+        settings.api.real_redemption_provider = os.getenv("REAL_REDEMPTION_PROVIDER", "WhiteoutProject")
         
         # Demo mode - must be explicitly enabled
         demo_mode_str = os.getenv("WOSM_DEMO_MODE", "false").lower()

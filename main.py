@@ -206,6 +206,61 @@ def check_system():
     else:
         warnings.append("Open source adapter not found")
     
+    # Check WhiteoutProject Provider (Real Redemption)
+    print("\n🎁 Checking WhiteoutProject Provider (Real Redemption)...")
+    engine_file = Path(__file__).parent / "modules" / "gift_codes" / "redemption_engine.py"
+    wp_provider_file = Path(__file__).parent / "integrations" / "whiteout_project_provider.py"
+    
+    if engine_file.exists():
+        engine_content = open(engine_file).read()
+        
+        # Check imports
+        if "whiteout_project_provider" in engine_content:
+            print("PASS: redemption_engine imports whiteout_project_provider")
+        else:
+            issues.append("redemption_engine.py does not import whiteout_project_provider")
+        
+        # Check provider routing
+        if "real_redemption_provider" in engine_content:
+            print("PASS: Provider routing implemented in redemption_engine")
+        else:
+            issues.append("redemption_engine.py does not have provider routing")
+        
+        # Check redeem call
+        if "whiteout_project_provider.redeem" in engine_content:
+            print("PASS: redemption_engine calls whiteout_project_provider.redeem")
+        else:
+            issues.append("redemption_engine.py does not call whiteout_project_provider.redeem")
+    
+    if wp_provider_file.exists():
+        print("PASS: whiteout_project_provider.py file exists")
+        
+        # Check for real API methods
+        provider_content = open(wp_provider_file).read()
+        if "/api/player" in provider_content and "/api/captcha" in provider_content and "/api/gift_code" in provider_content:
+            print("PASS: Real API endpoints implemented in provider")
+        else:
+            issues.append("Provider missing real API endpoints")
+    else:
+        issues.append("whiteout_project_provider.py not found")
+    
+    # Check .env.example for REAL_REDEMPTION_PROVIDER
+    env_example = Path(__file__).parent / ".env.example"
+    if env_example.exists():
+        env_content = open(env_example).read()
+        if "REAL_REDEMPTION_PROVIDER" in env_content:
+            print("PASS: REAL_REDEMPTION_PROVIDER documented in .env.example")
+        else:
+            issues.append("REAL_REDEMPTION_PROVIDER missing from .env.example")
+    
+    # Report distribution vs redemption separation
+    print("\n📊 Provider Status:")
+    print(f"   Real Redemption Provider: {getattr(settings.api, 'real_redemption_provider', 'Not Set')}")
+    if engine_file.exists() and "whiteout_project_provider.redeem" in open(engine_file).read():
+        print("   Real Redemption Route: Wired")
+    else:
+        print("   Real Redemption Route: NOT WIRED")
+    
     # Check for proprietary secrets in code
     print("\n🔒 Checking for proprietary secrets...")
     forbidden_patterns = ["sk_live_", "pk_live_", "api_key_", "secret_key_", "ghp_", "gho_", "ghs_"]

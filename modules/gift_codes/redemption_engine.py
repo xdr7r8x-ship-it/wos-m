@@ -9,8 +9,13 @@ from typing import Dict, Any, Optional, List, Callable
 import logging
 import re
 
+from config.settings import settings
 from integrations.gift_code_client import gift_code_client, GiftCodeStatus as APIStatus
 from integrations.captcha_service import captcha_service
+from integrations.whiteout_project_provider import (
+    whiteout_project_provider,
+    RedemptionStatus as WPStatus,
+)
 from modules.gift_codes.service import gift_code_service
 from modules.gift_codes.models import GiftCodeStatus as ModelStatus
 from core.database import db
@@ -92,6 +97,85 @@ class RedemptionEngine:
         # For now, return None to skip captcha
         return None
     
+    async def _redeem_via_whiteout_project(
+        self,
+        code: str,
+        player_id: int,
+        player_fid: str,
+    ) -> Dict[str, Any]:
+        """
+        Real WhiteoutProject redemption path.
+        This is the ONLY valid path for CenturyGame real redemption.
+        """
+        result = await whiteout_project_provider.redeem(code, player_fid)
+        
+        status = result.status
+        raw = result.raw_response or {}
+        message = result.message or status.value
+        
+        status_map = {
+            WPStatus.SUCCESS: ModelStatus.REDEEMED,
+            WPStatus.RECEIVED: ModelStatus.ALREADY_REDEEMED,
+            WPStatus.SAME_TYPE_EXCHANGE: ModelStatus.REDEEMED,
+            WPStatus.TIME_ERROR: ModelStatus.EXPIRED,
+            WPStatus.CDK_NOT_FOUND: ModelStatus.INVALID,
+            WPStatus.USAGE_LIMIT: ModelStatus.FAILED,
+            WPStatus.NOT_LOGIN: ModelStatus.FAILED,
+            WPStatus.UNAUTHORIZED: ModelStatus.FAILED,
+            WPStatus.LOGIN_FAILED: ModelStatus.FAILED,
+            WPStatus.CAPTCHA_INVALID: ModelStatus.FAILED,
+            WPStatus.CAPTCHA_ERROR: ModelStatus.FAILED,
+            WPStatus.CAPTCHA_TOO_FREQUENT: ModelStatus.PENDING,
+            WPStatus.CAPTCHA_FETCH_ERROR: ModelStatus.FAILED,
+            WPStatus.SOLVER_ERROR: ModelStatus.FAILED,
+            WPStatus.OCR_DISABLED: ModelStatus.FAILED,
+            WPStatus.SIGN_ERROR: ModelStatus.FAILED,
+            WPStatus.TIMEOUT_RETRY: ModelStatus.PENDING,
+            WPStatus.CONNECTION_ERROR: ModelStatus.PENDING,
+            WPStatus.UNKNOWN_API_RESPONSE: ModelStatus.FAILED,
+            WPStatus.ERROR: ModelStatus.FAILED,
+        }
+        
+        model_status = status_map.get(status, ModelStatus.FAILED)
+        
+        # Get gift code from DB
+        gift_code = await gift_code_service.get_code_by_code(code)
+        if gift_code:
+            await gift_code_service.update_code_status(gift_code.id, model_status)
+        
+        # Add redemption record
+        error_msg = None if status in [
+            WPStatus.SUCCESS, WPStatus.RECEIVED, WPStatus.SAME_TYPE_EXCHANGE
+        ] else message
+        
+        await gift_code_service.add_redemption(
+            gift_code.id if gift_code else 0,
+            player_id,
+            model_status.value,
+            error_message=error_msg,
+        )
+        
+        if status in [WPStatus.SUCCESS, WPStatus.RECEIVED, WPStatus.SAME_TYPE_EXCHANGE]:
+            return {
+                "success": True,
+                "provider": "WhiteoutProject",
+                "status": model_status.value,
+                "api_status": status.value,
+                "message": message,
+                "raw_response": raw,
+                "rewards": [],
+            }
+        
+        return {
+            "success": False,
+            "provider": "WhiteoutProject",
+            "status": model_status.value,
+            "api_status": status.value,
+            "error": status.value,
+            "message": message,
+            "raw_response": raw,
+        }
+    
     async def redeem_code(
         self,
         code: str,
@@ -168,6 +252,18 @@ class RedemptionEngine:
         # Update status to redeeming
         await gift_code_service.update_code_status(gift_code.id, ModelStatus.REDEEMING)
         
+        # Provider routing - WhiteoutProject is the ONLY valid path for real redemption
+        provider = getattr(settings.api, "real_redemption_provider", "WhiteoutProject")
+        
+        if provider.lower() == "whiteoutproject":
+            # Use WhiteoutProject provider - this handles captcha internally
+            return await self._redeem_via_whiteout_project(
+                code=code,
+                player_id=player_id,
+                player_fid=player_fid,
+            )
+        
+        # Generic/Custom provider fallback - uses gift_code_client
         # Solve captcha if needed
         captcha_token = await self.solve_captcha_if_needed(code)
         
@@ -179,7 +275,7 @@ class RedemptionEngine:
                 "message": "Captcha solving is required"
             }
         
-        # Attempt redemption
+        # Attempt redemption via Generic provider
         try:
             result = await gift_code_client.redeem_code(code, player_fid, captcha_token)
             

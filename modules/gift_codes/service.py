@@ -95,13 +95,16 @@ class GiftCodeService:
         self,
         code_id: int,
         player_id: int,
-        status: str = GiftCodeStatus.PENDING.value
+        status: str = GiftCodeStatus.PENDING.value,
+        error_message: Optional[str] = None,
+        provider: Optional[str] = None,
+        api_status: Optional[str] = None,
     ) -> int:
         """Add a redemption record."""
         cursor = await db.execute(
-            """INSERT INTO gift_redemptions (code_id, player_id, status) 
-               VALUES (?, ?, ?)""",
-            (code_id, player_id, status)
+            """INSERT INTO gift_redemptions (code_id, player_id, status, error_message, provider, api_status) 
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (code_id, player_id, status, error_message, provider, api_status)
         )
         await db.commit()
         return cursor.lastrowid
