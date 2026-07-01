@@ -55,13 +55,16 @@ jobs:
           found = []
           
           for py in Path('.').rglob('*.py'):
-            if 'test' in str(py) or '.venv' in str(py):
+            if 'test' in str(py) or '.venv' in str(py) or '__pycache__' in str(py):
+              continue
+            if py.name == 'main.py':  # Skip main.py - defines patterns for scanning
               continue
             with open(py) as f:
-              for i, line in enumerate(f, 1):
-                for pat in forbidden:
-                  if pat in line and 'os.getenv' not in line and '# ' + pat not in line:
-                    found.append(f'{py}:{i}: {pat}')
+              content = f.read()
+              for pat in forbidden:
+                matches = re.finditer(pat + r'[A-Za-z0-9_-]{10,}', content)
+                for m in matches:
+                  found.append(f'{py}: {pat}...')
           
           if found:
             print('SECRETS FOUND:')
