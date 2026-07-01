@@ -184,27 +184,41 @@ test_token_for_ci is explicitly REJECTED.
 
 ---
 
-## Live E2E Test Table
+## Owner Manual Test Required
 
-| Test | Result | Evidence | Impact | Classification |
-|------|--------|----------|--------|----------------|
-| Bot Gateway Connection | PASS | Session ID: 07fa7d5a3fd14ee11e6afade4e0282ae | Critical | — |
-| Bot Online Status | PASS | BOT_ID=1519806811744632994 | Critical | — |
-| Guild Membership | PASS | GUILDS=1 (Test Guild: تجارب) | Critical | — |
-| /wos Command Registration | PASS | Via Discord API | Critical | — |
-| Command Tree Sync | PASS | bot.py line 283 | High | — |
-| 90 custom_ids Implemented | PASS | All in modules/*/views.py | High | — |
-| 14 Modules Implemented | PASS | All directories in modules/ | High | — |
-| RBAC System | PASS | 5 levels in core/permissions.py | High | — |
-| Audit Logging | PASS | 14 categories in core/audit_log.py | High | — |
-| Error Handling | PASS | try/except in bot.py | High | — |
-| **Button Clicks in Discord** | ⚠️ REQUIRES UI | Cannot click buttons from terminal | HIGH | MAJOR |
-| **Alliance Creation** | ⚠️ REQUIRES UI | Cannot interact with modals | HIGH | MAJOR |
-| **Player Addition** | ⚠️ REQUIRES UI | Cannot submit forms | HIGH | MAJOR |
-| **Gift Code Redemption** | ⚠️ REQUIRES UI | Cannot trigger redemption | HIGH | MAJOR |
-| **Permission Testing** | ⚠️ REQUIRES UI | Need Owner/Member accounts | HIGH | MAJOR |
+**⚠️ IMPORTANT**: Live E2E button testing requires Discord UI access by the owner.
 
-**Note**: Live button testing requires Discord UI access. All code is verified to be correctly implemented.
+### Files Created for Owner Testing
+
+| File | Purpose |
+|------|---------|
+| `QA_OWNER_MANUAL_TEST_PLAN.md` | Step-by-step test instructions |
+| `QA_OWNER_RESULTS_TEMPLATE.md` | Results documentation template |
+| `qa/live-discord/db/DB_SUMMARY_TEMPLATE.md` | Database verification template |
+
+### How to Execute
+
+1. Owner opens `QA_OWNER_MANUAL_TEST_PLAN.md`
+2. Follows all 9 sections (A-I)
+3. Takes screenshots for each action
+4. Fills `QA_OWNER_RESULTS_TEMPLATE.md`
+5. Runs DB commands and fills `DB_SUMMARY_TEMPLATE.md`
+6. Submits results
+
+### Owner Test Summary
+
+| Test Section | Coverage |
+|--------------|----------|
+| A: /wos Command | 1 test |
+| B: Dashboard Buttons | 17 buttons |
+| C: Alliance Flow | 6 actions |
+| D: Player Flow | 7 actions |
+| E: Gift Codes | 7 actions |
+| F: RBAC (Member + Admin) | 16 tests |
+| G: Error Handling | 6 inputs |
+| H: Stability | 2 tests |
+| I: Database | Verification |
+| **TOTAL** | **62+ tests** |
 
 ---
 

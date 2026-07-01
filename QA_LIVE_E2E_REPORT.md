@@ -222,30 +222,77 @@ Description: WOS-M Main Dashboard
 
 ---
 
-## 14. Final Verdict
+## 14. Owner Manual Test Plan
 
-**RUNTIME STATUS**: ✅ PASS  
-**CODE QUALITY**: ✅ PASS  
-**TEST COVERAGE**: ✅ PASS  
-**SECURITY**: ✅ PASS  
+**⚠️ IMPORTANT**: Live E2E button testing requires Discord UI access.
 
-### Verdict: **PARTIAL LIVE E2E VERIFICATION**
+### Created Files for Owner Testing
 
-The bot successfully:
-- Connects to Discord Gateway
-- Is ONLINE and responsive
-- Has `/wos` command registered
-- Is in 1 guild with proper permissions
-- Passes all CI/CD gates
-- Has all modules implemented
-- Has complete RBAC system
-- Has complete audit logging
+| File | Purpose |
+|------|---------|
+| `QA_OWNER_MANUAL_TEST_PLAN.md` | Step-by-step test instructions |
+| `QA_OWNER_RESULTS_TEMPLATE.md` | Results documentation template |
+| `qa/live-discord/db/DB_SUMMARY_TEMPLATE.md` | Database verification template |
 
-**Cannot verify** (requires Discord UI):
-- Button interactions
-- Modal submissions
-- Database writes
-- User flows
+### Test Coverage (62+ tests)
+
+| Section | Tests | Owner Action Required |
+|---------|-------|---------------------|
+| A: /wos Command | 1 | Execute /wos in Discord |
+| B: Dashboard Buttons | 17 | Click each button |
+| C: Alliance Flow | 6 | Create/Edit/Delete alliance |
+| D: Player Flow | 7 | Add/Search/Export players |
+| E: Gift Codes | 7 | Test redemption flows |
+| F: RBAC | 16 | Test Member/Admin permissions |
+| G: Error Handling | 6 | Test invalid inputs |
+| H: Stability | 2 | Test repeated actions |
+| I: Database | Verification | Run DB commands |
+
+### Owner Instructions
+
+1. Open `QA_OWNER_MANUAL_TEST_PLAN.md`
+2. Follow all 9 sections (A-I)
+3. Take screenshots for each action
+4. Fill `QA_OWNER_RESULTS_TEMPLATE.md`
+5. Run DB commands and fill `DB_SUMMARY_TEMPLATE.md`
+6. Submit results for analysis
+
+---
+
+## 15. Final Verdict
+
+### What Can Be Verified Now
+
+| Verification | Status | Evidence |
+|--------------|--------|----------|
+| Bot Gateway Connection | ✅ PASS | Session ID verified |
+| Bot Online Status | ✅ PASS | BOT_ID confirmed |
+| Guild Membership | ✅ PASS | 1 guild, 4 members |
+| /wos Command Registration | ✅ PASS | API registration confirmed |
+| Code Quality | ✅ PASS | 167 tests, flake8, mypy |
+| CI/CD | ✅ PASS | 5/5 jobs green |
+| Security | ✅ PASS | No secrets, pip-audit clean |
+| 90 custom_ids Implemented | ✅ PASS | All in code |
+| 14 Modules Implemented | ✅ PASS | All directories present |
+| RBAC System | ✅ PASS | 5 levels in code |
+| Audit Logging | ✅ PASS | 14 categories in code |
+
+### What Requires Owner Testing
+
+| Verification | Status | Reason |
+|--------------|--------|--------|
+| Button Clicks | ⏳ REQUIRES OWNER | Needs Discord UI |
+| Alliance Creation | ⏳ REQUIRES OWNER | Needs Discord UI |
+| Player Addition | ⏳ REQUIRES OWNER | Needs Discord UI |
+| Gift Code Flow | ⏳ REQUIRES OWNER | Needs Discord UI |
+| RBAC Testing | ⏳ REQUIRES OWNER | Needs Discord UI |
+| Database Writes | ⏳ REQUIRES OWNER | Bot needs to be running |
+
+### Verdict: **AWAITING OWNER MANUAL TESTING**
+
+The bot is production-ready in terms of code quality, CI/CD, security, and runtime connection. All 90 buttons are implemented in code. All RBAC and audit logging is in place.
+
+**Live E2E button testing requires owner execution of `QA_OWNER_MANUAL_TEST_PLAN.md`.**
 
 ---
 
