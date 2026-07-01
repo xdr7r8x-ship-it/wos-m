@@ -46,7 +46,9 @@ jobs:
         run: python -m flake8 core modules integrations views tests main.py
       
       - name: Type Check
-        run: python -m mypy core modules integrations views main.py
+        run: |
+          pip install mypy numpy==1.26.4 -q
+          python -m mypy core modules integrations views main.py
       
       - name: Run Tests
         run: python -m pytest tests/ -v --tb=short
