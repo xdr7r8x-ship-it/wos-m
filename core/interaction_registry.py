@@ -1770,6 +1770,153 @@ INTERACTION_REGISTRY: dict[str, InteractionSpec] = {
         owner_only=True,
         emoji="💾"
     ),
+
+    # ═══════════════════════════════════════════════════════════
+    # Professional Owner Panel Buttons
+    # ═══════════════════════════════════════════════════════════
+    "prof_main": InteractionSpec(
+        custom_id="prof_main",
+        label_key="dashboard.professional_panel",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_main",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="👑"
+    ),
+    "prof_stats": InteractionSpec(
+        custom_id="prof_stats",
+        label_key="dashboard.prof_stats",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_stats",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="📊"
+    ),
+    "prof_users": InteractionSpec(
+        custom_id="prof_users",
+        label_key="dashboard.prof_users",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_users",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="👥"
+    ),
+    "prof_permissions": InteractionSpec(
+        custom_id="prof_permissions",
+        label_key="dashboard.prof_permissions",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_permissions",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🔐"
+    ),
+    "prof_settings": InteractionSpec(
+        custom_id="prof_settings",
+        label_key="dashboard.prof_settings",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_settings",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="⚙️"
+    ),
+    "prof_appearance": InteractionSpec(
+        custom_id="prof_appearance",
+        label_key="dashboard.prof_appearance",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_appearance",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🎨"
+    ),
+    "prof_gifts": InteractionSpec(
+        custom_id="prof_gifts",
+        label_key="dashboard.prof_gifts",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_gifts",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🎁"
+    ),
+    "prof_maintenance": InteractionSpec(
+        custom_id="prof_maintenance",
+        label_key="dashboard.prof_maintenance",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_maintenance",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🔧"
+    ),
+    "prof_broadcast": InteractionSpec(
+        custom_id="prof_broadcast",
+        label_key="dashboard.prof_broadcast",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_broadcast",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="📢"
+    ),
+    "prof_database": InteractionSpec(
+        custom_id="prof_database",
+        label_key="dashboard.prof_database",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_database",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🗄️"
+    ),
+    "prof_logs": InteractionSpec(
+        custom_id="prof_logs",
+        label_key="dashboard.prof_logs",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_logs",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="📜"
+    ),
+    "prof_alliances": InteractionSpec(
+        custom_id="prof_alliances",
+        label_key="dashboard.prof_alliances",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_alliances",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🏰"
+    ),
+    "prof_refresh": InteractionSpec(
+        custom_id="prof_refresh",
+        label_key="dashboard.refresh",
+        interaction_type=InteractionType.BUTTON,
+        module="owner_panel",
+        handler_name="_handle_prof_refresh",
+        required_permission=PermissionLevel.OWNER,
+        visible_to=("owner",),
+        owner_only=True,
+        emoji="🔄"
+    ),
 }
 
 

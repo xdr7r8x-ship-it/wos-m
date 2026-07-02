@@ -301,3 +301,60 @@ async def settings_timezone_callback(bot: WOSMBot, interaction: discord.Interact
         color=0x3498db
     )
     await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════
+# Professional Panel Callbacks - Delegation
+# ═══════════════════════════════════════════════════════════════════════════════════
+
+async def prof_main_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_main_callback
+    await owner_main_callback(bot, interaction)
+
+async def prof_stats_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_stats_callback
+    await owner_stats_callback(bot, interaction)
+
+async def prof_users_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_users_callback
+    await owner_users_callback(bot, interaction)
+
+async def prof_permissions_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_permissions_callback
+    await owner_permissions_callback(bot, interaction)
+
+async def prof_settings_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_settings_callback
+    await owner_settings_callback(bot, interaction)
+
+async def prof_appearance_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_appearance_callback
+    await owner_appearance_callback(bot, interaction)
+
+async def prof_gifts_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_gifts_callback
+    await owner_gifts_callback(bot, interaction)
+
+async def prof_maintenance_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_maintenance_callback
+    await owner_maintenance_callback(bot, interaction)
+
+async def prof_broadcast_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_broadcast_callback
+    await owner_broadcast_callback(bot, interaction)
+
+async def prof_database_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_database_callback
+    await owner_database_callback(bot, interaction)
+
+async def prof_logs_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_logs_callback
+    await owner_logs_callback(bot, interaction)
+
+async def prof_alliances_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_alliances_callback
+    await owner_alliances_callback(bot, interaction)
+
+async def prof_refresh_callback(bot: WOSMBot, interaction: discord.Interaction):
+    from modules.owner_panel.professional_panel import owner_main_callback
+    await owner_main_callback(bot, interaction)
