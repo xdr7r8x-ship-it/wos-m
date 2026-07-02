@@ -21,18 +21,17 @@ Image = None
 
 try:
     import sys
-    _fd, _null = sys.stderr.fileno(), os.open(os.devnull, os.O_WRONLY)
-    _bak = os.dup(_fd)
-    os.dup2(_null, _fd)
-    os.close(_null)
     import onnxruntime as ort
     import numpy as np
     from PIL import Image
-    os.dup2(_bak, _fd)
-    os.close(_bak)
     ONNX_AVAILABLE = True
 except ImportError:
     logger.warning("ONNX Runtime not installed. Using fallback solver.")
+    ort = None
+    np = None
+    Image = None
+except Exception as e:
+    logger.warning(f"ONNX Runtime initialization failed: {e}. Using fallback solver.")
     ort = None
     np = None
     Image = None
@@ -123,8 +122,10 @@ class OnnxCaptchaSolver:
             self._ddddocr_fallback = None
             self._ddddocr_available = False
     
-    def _preprocess_image(self, image_bytes: bytes) -> Optional[np.ndarray]:
+    def _preprocess_image(self, image_bytes: bytes) -> Optional["np.ndarray"]:
         """Preprocess image for ONNX model input."""
+        if np is None:
+            return None
         if not self.model_metadata:
             return None
         
@@ -154,6 +155,8 @@ class OnnxCaptchaSolver:
     
     def _run_inference_sync(self, image_bytes: bytes, session) -> Optional[Tuple[str, float]]:
         """Run ONNX inference synchronously."""
+        if np is None:
+            return None
         input_data = self._preprocess_image(image_bytes)
         if input_data is None:
             return None
