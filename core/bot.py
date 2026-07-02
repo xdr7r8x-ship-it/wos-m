@@ -301,6 +301,20 @@ class WOSMBot(discord.Client):
             "owner_broadcast": self._handle_owner_broadcast,
             "owner_database": self._handle_owner_database,
             "owner_alliances": self._handle_owner_alliances,
+            # Professional Panel Section Buttons
+            "prof_main": self._handle_prof_main,
+            "prof_stats": self._handle_prof_stats,
+            "prof_users": self._handle_prof_users,
+            "prof_permissions": self._handle_prof_permissions,
+            "prof_settings": self._handle_prof_settings,
+            "prof_appearance": self._handle_prof_appearance,
+            "prof_gifts": self._handle_prof_gifts,
+            "prof_maintenance": self._handle_prof_maintenance,
+            "prof_broadcast": self._handle_prof_broadcast,
+            "prof_database": self._handle_prof_database,
+            "prof_logs": self._handle_prof_logs,
+            "prof_alliances": self._handle_prof_alliances,
+            "prof_refresh": self._handle_prof_main,
             # Confirmation
             "confirm_btn": self._handle_confirm,
             "cancel_btn": self._handle_cancel,
@@ -641,6 +655,56 @@ class WOSMBot(discord.Client):
 
     async def _handle_owner_alliances(self, interaction: discord.Interaction):
         from modules.owner_panel.views import owner_alliances_callback
+        await owner_alliances_callback(self, interaction)
+    
+    # ── Professional Panel Handlers ─────────────────────────────────────
+
+    async def _handle_prof_main(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_main_callback
+        await owner_main_callback(self, interaction)
+
+    async def _handle_prof_stats(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_stats_callback
+        await owner_stats_callback(self, interaction)
+
+    async def _handle_prof_users(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_users_callback
+        await owner_users_callback(self, interaction)
+
+    async def _handle_prof_permissions(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_permissions_callback
+        await owner_permissions_callback(self, interaction)
+
+    async def _handle_prof_settings(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_settings_callback
+        await owner_settings_callback(self, interaction)
+
+    async def _handle_prof_appearance(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_appearance_callback
+        await owner_appearance_callback(self, interaction)
+
+    async def _handle_prof_gifts(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_gifts_callback
+        await owner_gifts_callback(self, interaction)
+
+    async def _handle_prof_maintenance(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_maintenance_callback
+        await owner_maintenance_callback(self, interaction)
+
+    async def _handle_prof_broadcast(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_broadcast_callback
+        await owner_broadcast_callback(self, interaction)
+
+    async def _handle_prof_database(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_database_callback
+        await owner_database_callback(self, interaction)
+
+    async def _handle_prof_logs(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_logs_callback
+        await owner_logs_callback(self, interaction)
+
+    async def _handle_prof_alliances(self, interaction: discord.Interaction):
+        from modules.owner_panel.professional_panel import owner_alliances_callback
         await owner_alliances_callback(self, interaction)
     
     async def _handle_language(self, interaction: discord.Interaction):
