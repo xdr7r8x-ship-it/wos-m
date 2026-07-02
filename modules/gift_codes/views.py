@@ -177,7 +177,7 @@ async def add_gift_code_callback(bot: WOSMBot, interaction: discord.Interaction)
                     return
                 
                 # Add the code
-                from modules.gift_codes.models import GiftCodeStatus, GiftCodeType
+                from modules.gift_codes.models import GiftCodeStatus
                 await gift_code_service.create_code(
                     code=code,
                     code_type=code_type,
@@ -446,7 +446,7 @@ async def auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
             "auto_redeem_max_daily": "الحد الأقصى يومياً",
         }
         
-        settings_dict = {s.get('key'): s.get('value') for s in settings}
+        settings_dict = {s['key']: s['value'] for s in settings}
         
         for key, desc in default_settings.items():
             value = settings_dict.get(key, 'غير مفعّل' if 'enabled' in key else '0')
@@ -488,7 +488,7 @@ async def gift_report_callback(bot: WOSMBot, interaction: discord.Interaction):
     try:
         # Get statistics
         total_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes")
-        used_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = 'used'")
+        used_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = GiftCodeStatus.REDEEMED.value")
         pending_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = 'pending'")
         total_redemptions = await db.fetchone("SELECT COUNT(*) as count FROM gift_redemptions")
         
@@ -499,22 +499,22 @@ async def gift_report_callback(bot: WOSMBot, interaction: discord.Interaction):
         
         embed.add_field(
             name="📦 إجمالي الأكواد",
-            value=str(total_codes.get('count', 0) if total_codes else 0),
+            value=str(total_codes['count'] if total_codes else 0),
             inline=True
         )
         embed.add_field(
             name="✅ الأكواد المستخدمة",
-            value=str(used_codes.get('count', 0) if used_codes else 0),
+            value=str(used_codes['count'] if used_codes else 0),
             inline=True
         )
         embed.add_field(
             name="⏳ الأكواد المعلقة",
-            value=str(pending_codes.get('count', 0) if pending_codes else 0),
+            value=str(pending_codes['count'] if pending_codes else 0),
             inline=True
         )
         embed.add_field(
             name="🎁 إجمالي الاستردادات",
-            value=str(total_redemptions.get('count', 0) if total_redemptions else 0),
+            value=str(total_redemptions['count'] if total_redemptions else 0),
             inline=True
         )
         
@@ -523,14 +523,15 @@ async def gift_report_callback(bot: WOSMBot, interaction: discord.Interaction):
             SELECT gr.*, gc.code 
             FROM gift_redemptions gr
             JOIN gift_codes gc ON gr.code_id = gc.id
-            ORDER BY gr.redemed_at DESC
+            ORDER BY gr.redeemed_at DESC
             LIMIT 5
         """)
         
         if recent:
+            recent_list = [dict(r) for r in recent]
             recent_text = "\n".join([
-                f"• `{r.get('code', '—')[:15]}` - {r.get('redemed_at', '—')[:10]}"
-                for r in recent
+                f"• `{r['code'][:15]}` - {r.get('redeemed_at', '—')[:10]}"
+                for r in recent_list
             ])
             embed.add_field(name="🔄 آخر الاستردادات", value=recent_text, inline=False)
         

@@ -39,7 +39,7 @@ async def redeem_gift_code(
         return False, "التحالف غير موجود"
     
     # Get player_id from alliance
-    player_id = alliance.get("owner_player_id") or alliance.get("player_id")
+    player_id = alliance["owner_player_id"] or alliance["player_id"]
     
     if not player_id:
         return False, "لا يمكن تحديد مالك التحالف"
@@ -56,7 +56,7 @@ async def redeem_gift_code(
         user_id=str(player_id),
         user_name=f"Alliance:{alliance_id}",
         action=f"redeem_gift_code:{code}",
-        category=AuditCategory.GIFT_REDEMPTION,
+        category=AuditCategory.GIFT_CODES,
         details={
             "code": code,
             "alliance_id": alliance_id,
@@ -95,14 +95,14 @@ async def validate_gift_code(code: str) -> Tuple[bool, str, Dict[str, Any]]:
         return False, "الكود غير موجود", {}
     
     # Check status
-    if gift_code.status == GiftCodeStatus.USED:
-        return False, "الكود مستخدم مسبقاً", {"status": "used"}
+    if gift_code.status == GiftCodeStatus.REDEEMED:
+        return False, "الكود مستخدم مسبقاً", {"status": "redeemed"}
     
     if gift_code.status == GiftCodeStatus.EXPIRED:
         return False, "الكود منتهي الصلاحية", {"status": "expired"}
     
-    if gift_code.status == GiftCodeStatus.REVOKED:
-        return False, "الكود ملغي", {"status": "revoked"}
+    if gift_code.status == GiftCodeStatus.ALREADY_REDEEMED:
+        return False, "الكود مستخدم مسبقاً", {"status": "already_redeemed"}
     
     if gift_code.status == GiftCodeStatus.PENDING:
         return False, "الكود غير مفعل بعد", {"status": "pending"}
@@ -138,7 +138,7 @@ async def get_alliance_gift_history(
     if not alliance:
         return []
     
-    player_id = alliance.get("owner_player_id") or alliance.get("player_id")
+    player_id = alliance["owner_player_id"] or alliance["player_id"]
     
     if not player_id:
         return []
@@ -149,7 +149,7 @@ async def get_alliance_gift_history(
         FROM gift_redemptions gr
         JOIN gift_codes gc ON gr.code_id = gc.id
         WHERE gr.player_id = ?
-        ORDER BY gr.redemed_at DESC
+        ORDER BY gr.redeemed_at DESC
         LIMIT ?
     """, (player_id, limit))
     
