@@ -117,6 +117,13 @@ LOCAL_VIEW_CALLBACKS = {
     "page_select",
     "settings_select",
     "feature_select",
+    # Gift code dashboard buttons (handled by _button_callbacks)
+    "gift_dash_add",
+    "gift_dash_single",
+    "gift_dash_batch",
+    "gift_dash_alliance",
+    "gift_dash_auto",
+    "gift_dash_report",
 }
 
 # Track dispatched interactions to prevent double execution
@@ -147,6 +154,15 @@ async def dispatch_registered_interaction(bot, interaction):
 
     # Case 1: Unregistered custom_id
     if spec is None:
+        # Check if it's a local button callback (e.g., gift_dash_*)
+        if custom_id in LOCAL_VIEW_CALLBACKS:
+            handler = getattr(bot, '_button_callbacks', {}).get(custom_id) or \
+                     getattr(bot, '_select_callbacks', {}).get(custom_id)
+            if handler:
+                result = handler(interaction)
+                if inspect.isawaitable(result):
+                    await result
+                return
         # Log and reject unregistered IDs
         import logging
         logging.warning(f"UNREGISTERED_CUSTOM_ID: {custom_id}")
