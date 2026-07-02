@@ -291,6 +291,16 @@ class WOSMBot(discord.Client):
             "owner_panel_icons": self._handle_owner_icons,
             "owner_panel_branding": self._handle_owner_branding,
             "owner_panel_features": self._handle_owner_features,
+            # Professional Owner Panel
+            "owner_stats": self._handle_owner_stats,
+            "owner_users": self._handle_owner_users,
+            "owner_permissions": self._handle_owner_permissions,
+            "owner_settings": self._handle_owner_settings,
+            "owner_maintenance": self._handle_owner_maintenance,
+            "owner_gift": self._handle_owner_gift,
+            "owner_broadcast": self._handle_owner_broadcast,
+            "owner_database": self._handle_owner_database,
+            "owner_alliances": self._handle_owner_alliances,
             # Confirmation
             "confirm_btn": self._handle_confirm,
             "cancel_btn": self._handle_cancel,
@@ -594,6 +604,44 @@ class WOSMBot(discord.Client):
     async def _handle_owner_panel(self, interaction: discord.Interaction):
         from modules.owner_panel.views import owner_panel_callback
         await owner_panel_callback(self, interaction)
+
+    # ── Professional Owner Panel Handlers ──────────────────────────────
+
+    async def _handle_owner_stats(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_stats_callback
+        await owner_stats_callback(self, interaction)
+
+    async def _handle_owner_users(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_users_callback
+        await owner_users_callback(self, interaction)
+
+    async def _handle_owner_permissions(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_permissions_callback
+        await owner_permissions_callback(self, interaction)
+
+    async def _handle_owner_settings(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_settings_callback
+        await owner_settings_callback(self, interaction)
+
+    async def _handle_owner_maintenance(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_maintenance_callback
+        await owner_maintenance_callback(self, interaction)
+
+    async def _handle_owner_gift(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_gift_callback
+        await owner_gift_callback(self, interaction)
+
+    async def _handle_owner_broadcast(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_broadcast_callback
+        await owner_broadcast_callback(self, interaction)
+
+    async def _handle_owner_database(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_database_callback
+        await owner_database_callback(self, interaction)
+
+    async def _handle_owner_alliances(self, interaction: discord.Interaction):
+        from modules.owner_panel.views import owner_alliances_callback
+        await owner_alliances_callback(self, interaction)
     
     async def _handle_language(self, interaction: discord.Interaction):
         from modules.dashboard.views import language_callback
