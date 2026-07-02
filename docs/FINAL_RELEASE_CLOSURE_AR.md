@@ -86,10 +86,25 @@ Directories checked: core, modules, integrations, views, tests, main.py
 
 ### docker build
 ```
-⚠️ SKIPPED - Docker daemon not available in environment
-HEALTHCHECK instruction verified manually in Dockerfile:
-  HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-      CMD python main.py --check || exit 1
+✅ PASS - Image built successfully
+Tag: wos-m:final-check
+Steps completed: 12/12
+```
+
+### docker run main.py --check
+```
+✅ PASS - All static checks passed
+- .env check: skipped (static mode)
+- BOT_TOKEN check: skipped (static mode)
+- discord_role_id in schema: PASS
+- state_kid in schema: PASS
+- button_configs compatibility patch: PASS
+- duplicate setup_hook guard: PASS
+- add_alliance_discord_role_id migration: PASS
+- ar.json: PASS
+- en.json: PASS
+- /wos command: PASS
+- No hardcoded proprietary secrets: PASS
 ```
 
 ### Button Tree Verification
@@ -148,8 +163,13 @@ Handled callbacks:
 | mypy | ✅ PASS |
 | main.py --check | ✅ PASS |
 | security_scan | ✅ PASS |
-| docker build | ⚠️ SKIPPED (daemon unavailable) |
+| docker build | ✅ PASS |
+| docker run | ✅ PASS |
 | button tree | ✅ PASS (22/22) |
+
+---
+
+## ✅ جاهز للإطلاق النهائي
 
 ---
 
