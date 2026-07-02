@@ -157,6 +157,9 @@ jobs:
   discord-runtime-qa:
     name: Discord Runtime QA Live
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      HAS_DISCORD_RUNTIME_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -172,7 +175,12 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
+      - name: Skip live runtime QA when token is not configured
+        if: env.HAS_DISCORD_RUNTIME_TOKEN != 'true'
+        run: echo "DISCORD_BOT_TOKEN secret is not configured; skipping live Discord runtime QA."
+
       - name: Run Discord runtime smoke test
+        if: env.HAS_DISCORD_RUNTIME_TOKEN == 'true'
         env:
           DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
         run: python scripts/discord_runtime_smoke.py
