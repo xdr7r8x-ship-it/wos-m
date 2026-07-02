@@ -18,16 +18,16 @@
 
 | # | المشكلة | الخطورة | الملف | الحالة |
 |---|---------|---------|-------|--------|
-| 1 | ~~اختبار `test_settings_load_from_env_reads_dotenv_values` يفشل~~ | ~~P0~~ | ~~`tests/`~~ | ✅ **تم الإصلاح** |
-| 2 | ازدواجية نظام الصلاحيات بين Registry و core | P1 | `core/` | ⚠️ |
-| 3 | عدم وجود rate limiting في API calls | P1 | `integrations/` | ⚠️ |
-| 4 | بعض handlers غير موجودة (settings_*) | P2 | `core/bot.py` | ⚠️ |
-| 5 | ازدواجية custom_id بين Registry و Bot | P2 | `core/bot.py` | ⚠️ |
-| 6 | مسار DB في CI/CD غير صحيح | P2 | `.github/workflows/ci.yml` | ⚠️ |
-| 7 | بدون healthcheck في Docker | P3 | `Dockerfile` | ⚠️ |
-| 8 | نقص في توثيق API | P3 | `docs/` | ⚠️ |
-| 9 | اختبارات تكامل مفقودة | P2 | `tests/` | ⚠️ |
-| 10 | عدم وجود monitoring في الإنتاج | P3 | `core/` | ⚠️ |
+| 1 | ~~اختبار `test_settings_load_from_env_reads_dotenv_values` يفشل~~ | ~~P0~~ | ~~`tests/`~~ | ✅ **CLOSED** |
+| 2 | ~~ازدواجية نظام الصلاحيات بين Registry و core~~ | ~~P1~~ | ~~`core/`~~ | ✅ **CLOSED** |
+| 3 | ~~عدم وجود rate limiting في API calls~~ | ~~P1~~ | ~~`integrations/`~~ | ✅ **CLOSED** |
+| 4 | ~~بعض handlers غير موجودة (settings_*)~~ | ~~P2~~ | ~~`core/bot.py`~~ | ✅ **CLOSED** |
+| 5 | ~~ازدواجية custom_id بين Registry و Bot~~ | ~~P2~~ | ~~`core/bot.py`~~ | ✅ **CLOSED** |
+| 6 | ~~مسار DB في CI/CD غير صحيح~~ | ~~P2~~ | ~~`.github/workflows/ci.yml`~~ | ✅ **CLOSED** |
+| 7 | ~~بدون healthcheck في Docker~~ | ~~P3~~ | ~~`Dockerfile`~~ | ✅ **CLOSED** |
+| 8 | نقص في توثيق API | P3 | `docs/` | ℹ️ |
+| 9 | اختبارات تكامل مفقودة | P2 | `tests/` | ℹ️ |
+| 10 | عدم وجود monitoring في الإنتاج | P3 | `core/` | ℹ️ |
 
 ### أهم 10 إصلاحات مطلوبة
 
