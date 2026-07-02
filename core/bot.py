@@ -245,6 +245,13 @@ class WOSMBot(discord.Client):
             "gift_redeem_alliance": self._handle_gift_redeem_alliance,
             "gift_auto": self._handle_gift_auto,
             "gift_report": self._handle_gift_report,
+            # Gift codes dashboard
+            "gift_dash_add": self._handle_gift_dash_add,
+            "gift_dash_single": self._handle_gift_dash_single,
+            "gift_dash_batch": self._handle_gift_dash_batch,
+            "gift_dash_alliance": self._handle_gift_dash_alliance,
+            "gift_dash_auto": self._handle_gift_dash_auto,
+            "gift_dash_report": self._handle_gift_dash_report,
             # Auto redeem
             "auto_enable_alliance": self._handle_auto_enable_alliance,
             "auto_disable_alliance": self._handle_auto_disable_alliance,
@@ -590,6 +597,30 @@ class WOSMBot(discord.Client):
         await auto_redeem_callback(self, interaction)
     
     async def _handle_gift_report(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import gift_report_callback
+        await gift_report_callback(self, interaction)
+
+    async def _handle_gift_dash_add(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import add_gift_code_callback
+        await add_gift_code_callback(self, interaction)
+
+    async def _handle_gift_dash_single(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import redeem_single_code_callback
+        await redeem_single_code_callback(self, interaction)
+
+    async def _handle_gift_dash_batch(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import batch_redeem_callback
+        await batch_redeem_callback(self, interaction)
+
+    async def _handle_gift_dash_alliance(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import redeem_alliance_callback
+        await redeem_alliance_callback(self, interaction)
+
+    async def _handle_gift_dash_auto(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import auto_redeem_callback
+        await auto_redeem_callback(self, interaction)
+
+    async def _handle_gift_dash_report(self, interaction: discord.Interaction):
         from modules.gift_codes.views import gift_report_callback
         await gift_report_callback(self, interaction)
     
