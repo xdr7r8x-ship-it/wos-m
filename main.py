@@ -35,40 +35,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
-def install_runtime_compatibility_patches():
-    """Install startup compatibility fixes before discord.py calls setup_hook."""
-    from core.database import Database
-
-    if getattr(Database, "_wosm_runtime_patches_installed", False):
-        return
-
-    original_create_tables = Database._create_tables
-
-    async def patched_create_tables(self):
-        await original_create_tables(self)
-        await self._db.executescript("""
-            CREATE TABLE IF NOT EXISTS button_configs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                custom_id TEXT UNIQUE NOT NULL,
-                label TEXT NOT NULL,
-                emoji TEXT,
-                enabled BOOLEAN DEFAULT 1,
-                created_by TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_button_configs_custom_id
-            ON button_configs(custom_id);
-        """)
-        await self._db.commit()
-
-    Database._create_tables = patched_create_tables
-    Database._wosm_runtime_patches_installed = True
-
-
 async def run_bot():
-    install_runtime_compatibility_patches()
     bot = WOSMBot()
     # discord.py already calls setup_hook before the gateway is ready.
     # The flag prevents the legacy on_ready fallback from running setup_hook twice.
@@ -157,15 +124,19 @@ def check_system():
             print("PASS: state_kid in schema")
         else:
             issues.append("state_kid not found in schema")
+        if "CREATE TABLE IF NOT EXISTS button_configs" in db_content:
+            print("PASS: button_configs in database schema")
+        else:
+            issues.append("button_configs table not found in database schema")
+        if "add_button_configs" in db_content:
+            print("PASS: add_button_configs migration exists")
+        else:
+            issues.append("add_button_configs migration missing")
 
-    # Check runtime compatibility patches
+    # Check setup hook guard
     main_file = Path(__file__)
     with open(main_file) as f:
         main_content = f.read()
-    if "button_configs" in main_content:
-        print("PASS: button_configs compatibility patch")
-    else:
-        issues.append("button_configs compatibility patch missing")
     if "bot._setup_complete = True" in main_content:
         print("PASS: duplicate setup_hook guard")
     else:
