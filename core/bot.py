@@ -245,6 +245,13 @@ class WOSMBot(discord.Client):
             "gift_redeem_alliance": self._handle_gift_redeem_alliance,
             "gift_auto": self._handle_gift_auto,
             "gift_report": self._handle_gift_report,
+            # Gift panel dashboard buttons
+            "gift_panel_add": self._handle_gift_add,
+            "gift_panel_single": self._handle_gift_redeem_single,
+            "gift_panel_batch": self._handle_gift_batch,
+            "gift_panel_alliance": self._handle_gift_redeem_alliance,
+            "gift_panel_auto": self._handle_gift_auto,
+            "gift_panel_report": self._handle_gift_report,
             # Auto redeem
             "auto_enable_alliance": self._handle_auto_enable_alliance,
             "auto_disable_alliance": self._handle_auto_disable_alliance,

@@ -155,37 +155,37 @@ async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="➕ إضافة كود",
-        custom_id="gift_add",
+        custom_id="gift_panel_add",
         emoji="➕"
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="🎫 استرداد فردي",
-        custom_id="gift_redeem_single",
+        custom_id="gift_panel_single",
         emoji="🎫"
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="📦 استرداد جماعي",
-        custom_id="gift_batch",
+        custom_id="gift_panel_batch",
         emoji="📦"
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.secondary,
         label="🏰 للأونلاين",
-        custom_id="gift_redeem_alliance",
+        custom_id="gift_panel_alliance",
         emoji="🏰"
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.secondary,
         label="⚙️ تلقائي",
-        custom_id="gift_auto",
+        custom_id="gift_panel_auto",
         emoji="⚙️"
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.secondary,
         label="📊 التقرير",
-        custom_id="gift_report",
+        custom_id="gift_panel_report",
         emoji="📊"
     ))
     
