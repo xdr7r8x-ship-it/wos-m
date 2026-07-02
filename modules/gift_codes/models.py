@@ -30,18 +30,22 @@ class GiftCode:
     added_by: Optional[str]
     added_at: datetime
     redeemed_at: Optional[datetime]
+    code_type: Optional[str] = None  # Legacy field (may not exist in DB)
+    value: Optional[str] = None  # Legacy field (may not exist in DB)
     
     @classmethod
     def from_row(cls, row) -> "GiftCode":
         """Create from database row."""
         return cls(
-            id=row["id"],
-            code=row["code"],
-            alliance_id=row["alliance_id"] if "alliance_id" in row.keys() else None,
-            status=GiftCodeStatus(row["status"]),
-            added_by=row["added_by"] if "added_by" in row.keys() else None,
-            added_at=datetime.fromisoformat(row["added_at"]) if "added_at" in row.keys() and row["added_at"] else datetime.now(),
-            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if "redeemed_at" in row.keys() and row["redeemed_at"] else None
+            id=row.get("id"),
+            code=row.get("code", ""),
+            alliance_id=row.get("alliance_id"),
+            status=GiftCodeStatus(row.get("status", "pending")),
+            added_by=row.get("added_by"),
+            added_at=datetime.fromisoformat(row["added_at"]) if row.get("added_at") else datetime.now(),
+            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if row.get("redeemed_at") else None,
+            code_type=row.get("code_type"),
+            value=row.get("value")
         )
 
 

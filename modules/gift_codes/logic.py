@@ -115,9 +115,7 @@ async def validate_gift_code(code: str) -> Tuple[bool, str, Dict[str, Any]]:
     
     # Return valid
     return True, "الكود صالح للاستخدام", {
-        "status": gift_code.status.value,
-        "type": gift_code.code_type,
-        "value": gift_code.value
+        "status": gift_code.status.value
     }
 
 
