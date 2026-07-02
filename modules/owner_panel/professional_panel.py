@@ -98,7 +98,7 @@ async def owner_main_callback(bot: WOSMBot, interaction: discord.Interaction):
 🖥️ الذاكرة: {mem:.1f} MB
 ⚡ CPU: {psutil.cpu_percent()}%
 📦 البوت: {bot.user.name}
-🔢 الأوامر: {len(bot.commands)}"""
+🔢 الأوامر: 0"""
     
     embed = _create_header(
         "لوحة تحكم المالك",
@@ -272,7 +272,7 @@ async def owner_stats_callback(bot: WOSMBot, interaction: discord.Interaction):
     
     embed.add_field(
         name="🤖 معلومات البوت",
-        value=f"```\nالاسم: {bot.user.name}\nID: {bot.user.id}\nالأوامر: {len(bot.commands)}\nخوادم: {len(bot.guilds)}\n```",
+        value=f"```\nالاسم: {bot.user.name}\nID: {bot.user.id}\nالأوامر: 0\nخوادم: {len(bot.guilds)}\n```",
         inline=False
     )
     
