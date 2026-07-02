@@ -7,9 +7,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+import dotenv
+
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
+
+# Load environment variables from the local .env file when present.
+dotenv.load_dotenv(BASE_DIR / ".env", override=False)
 
 
 @dataclass
