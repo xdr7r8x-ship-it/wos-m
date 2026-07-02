@@ -396,14 +396,6 @@ class Database:
         
         migrations = [
             {
-                "name": "add_alliance_gift_channel",
-                "sql": "ALTER TABLE alliances ADD COLUMN gift_channel_id TEXT;"
-            },
-            {
-                "name": "add_alliance_member_count",
-                "sql": "ALTER TABLE alliances ADD COLUMN member_count INTEGER DEFAULT 0;"
-            },
-            {
                 "name": "add_redemption_unique",
                 "sql": """
                     CREATE UNIQUE INDEX IF NOT EXISTS idx_redemption_unique 
