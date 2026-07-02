@@ -7,19 +7,15 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable, Optional, Any
 
+# Import PermissionLevel from core.permissions to avoid duplication
+# This is the SINGLE SOURCE OF TRUTH for permissions
+from core.permissions import PermissionLevel
+
 
 class InteractionType(str, Enum):
     BUTTON = "button"
     SELECT = "select"
     MODAL = "modal"
-
-
-class PermissionLevel(str, Enum):
-    OWNER = "owner"           # Bot owner only
-    GLOBAL_ADMIN = "global_admin"  # Global admin
-    SERVER_ADMIN = "server_admin"  # Server admin
-    ALLIANCE_ADMIN = "alliance_admin"  # Alliance admin
-    MEMBER = "member"          # Any member
 
 
 class Visibility(str, Enum):

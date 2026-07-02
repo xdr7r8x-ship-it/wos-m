@@ -27,5 +27,9 @@ COPY . .
 # Create data directory
 RUN mkdir -p /app/data/logs /app/data/backups
 
+# Healthcheck using static system check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD python main.py --check || exit 1
+
 # Set entrypoint
 ENTRYPOINT ["python", "main.py"]

@@ -9,6 +9,11 @@ from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 from config.settings import settings
+from integrations.rate_limiter import (
+    RateLimiter, RateLimiterConfig, RateLimitError,
+    safe_log_request, safe_log_response, safe_log_error,
+    get_default_limiter
+)
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +41,16 @@ class GiftCodeClient:
     - Single and batch redemption
     - Captcha solving integration
     - Error handling and retry logic
+    - Rate limiting and timeout
     """
     
-    def __init__(self):
+    def __init__(self, rate_limiter: Optional[RateLimiter] = None):
         self.base_url = settings.api.gift_code_api_base_url
         self.timeout = settings.api.request_timeout
         self._captcha_token: Optional[str] = None
         self._captcha_expires: Optional[datetime] = None
+        self._rate_limiter = rate_limiter or get_default_limiter()
+        self._session: Optional[aiohttp.ClientSession] = None
     
     @property
     def is_demo_mode(self) -> bool:
@@ -70,7 +78,38 @@ class GiftCodeClient:
                 headers["X-Captcha-Token"] = self._captcha_token
         
         return headers
-    
+
+    async def _request_with_rate_limit(
+        self,
+        method: str,
+        url: str,
+        **kwargs
+    ) -> tuple:
+        """
+        Perform an HTTP request with rate limiting, timeout, and retry.
+        Returns (status_code, response_data).
+        """
+        async def _do_request():
+            async with aiohttp.ClientSession() as session:
+                safe_log_request(method, url, **kwargs)
+                async with session.request(
+                    method,
+                    url,
+                    **kwargs
+                ) as response:
+                    safe_log_response(response.status, url)
+                    try:
+                        data = await response.json()
+                    except Exception:
+                        data = await response.text()
+                    return response.status, data
+
+        try:
+            return await self._rate_limiter.execute_with_retry(_do_request)
+        except Exception as e:
+            safe_log_error(e, url)
+            return 0, None
+
     def set_captcha_token(self, token: str, expires_in_seconds: int = 300):
         """Set the captcha token with expiration."""
         self._captcha_token = token

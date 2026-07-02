@@ -797,6 +797,93 @@ class WOSMBot(discord.Client):
     async def _handle_notif_select(self, interaction: discord.Interaction):
         await self._route_to_module(interaction, "notifications", "notif_select")
     
+    async def _handle_settings_save(self, interaction: discord.Interaction):
+        """Handle settings save button - saves current bot settings."""
+        from core.i18n import i18n
+        from core.audit_log import audit_log, AuditCategory
+        
+        await interaction.response.defer(thinking=True)
+        
+        try:
+            # Get current settings summary
+            settings_info = []
+            settings_info.append(f"**Bot Token:** {'✅ Configured' if settings.bot.token else '❌ Missing'}")
+            settings_info.append(f"**Owner ID:** {settings.bot.owner_id}")
+            settings_info.append(f"**Application ID:** {settings.bot.application_id}")
+            settings_info.append(f"**Demo Mode:** {'Yes' if settings.demo_mode else 'No'}")
+            settings_info.append(f"**Default Language:** {settings.i18n.default_language}")
+            settings_info.append(f"**Database:** {settings.database.url}")
+            
+            embed = discord.Embed(
+                title=f"💾 {i18n.get('settings.title')}",
+                description="\n".join(settings_info),
+                color=0x2ecc71
+            )
+            
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            
+            await audit_log.log(
+                user_id=str(interaction.user.id),
+                user_name=str(interaction.user),
+                action="settings_saved",
+                category=AuditCategory.SETTINGS,
+                details={"settings_viewed": True}
+            )
+        except Exception as e:
+            logger.error(f"Error in _handle_settings_save: {e}")
+            await interaction.followup.send(
+                f"❌ {i18n.get('errors.generic')}: {str(e)}",
+                ephemeral=True
+            )
+
+    async def _handle_settings_reset(self, interaction: discord.Interaction):
+        """Handle settings reset button - resets settings to defaults."""
+        from core.i18n import i18n
+        from core.audit_log import audit_log, AuditCategory
+        
+        await interaction.response.defer(thinking=True)
+        
+        try:
+            # Confirm reset operation
+            embed = discord.Embed(
+                title=f"🔄 {i18n.get('settings.reset_settings')}",
+                description=i18n.get('messages.confirm_action'),
+                color=0xf39c12
+            )
+            
+            # Create confirmation view
+            view = discord.ui.View()
+            view.add_item(discord.ui.Button(
+                label=i18n.get('buttons.yes'),
+                style=discord.ButtonStyle.danger,
+                custom_id="confirm_btn"
+            ))
+            view.add_item(discord.ui.Button(
+                label=i18n.get('buttons.no'),
+                style=discord.ButtonStyle.secondary,
+                custom_id="cancel_btn"
+            ))
+            
+            await interaction.followup.send(
+                embed=embed,
+                view=view,
+                ephemeral=True
+            )
+            
+            await audit_log.log(
+                user_id=str(interaction.user.id),
+                user_name=str(interaction.user),
+                action="settings_reset_requested",
+                category=AuditCategory.SETTINGS,
+                details={"reset_initiated": True}
+            )
+        except Exception as e:
+            logger.error(f"Error in _handle_settings_reset: {e}")
+            await interaction.followup.send(
+                f"❌ {i18n.get('errors.generic')}: {str(e)}",
+                ephemeral=True
+            )
+
     async def on_ready(self):
         """Called when bot is ready."""
         logger.info(f"Logged in as {self.user}")
