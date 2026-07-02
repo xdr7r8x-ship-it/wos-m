@@ -458,10 +458,10 @@ async def maint_logs_callback(bot: WOSMBot, interaction: discord.Interaction):
             embed.description = "لا توجد سجلات حديثة"
         else:
             for log in logs:
-                timestamp = log.get("created_at", "—")
-                action = log.get("action", "غير معروف")[:50]
-                user = log.get("user_name", "—")[:30]
-                category = log.get("category", "—")
+                timestamp = log["created_at"] if "created_at" in log.keys() else "—"
+                action = log["action"][:50] if "action" in log.keys() else "غير معروف"
+                user = log["user_name"][:30] if "user_name" in log.keys() else "—"
+                category = log["category"] if "category" in log.keys() else "—"
                 embed.add_field(
                     name=f"⏰ {timestamp}",
                     value=f"**إجراء:** `{action}`\n**مستخدم:** {user}\n**فئة:** {category}",
