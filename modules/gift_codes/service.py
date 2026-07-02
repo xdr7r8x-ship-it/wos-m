@@ -21,6 +21,22 @@ class GiftCodeService:
         )
         await db.commit()
         return cursor.lastrowid
+
+    async def create_code(
+        self,
+        code: str,
+        code_type: Optional[str] = None,
+        value: Optional[str] = None,
+        created_by: Optional[str] = None,
+        alliance_id: Optional[int] = None,
+    ) -> int:
+        """Compatibility API used by Discord modal callbacks.
+
+        The current schema stores the redeemable code itself and optional alliance scope.
+        Legacy UI fields `code_type` and `value` are intentionally accepted so modal
+        callbacks do not fail while the schema remains compact and stable.
+        """
+        return await self.add_code(code=code, alliance_id=alliance_id, added_by=created_by)
     
     async def get_code(self, code_id: int) -> Optional[GiftCode]:
         """Get a gift code by ID."""
