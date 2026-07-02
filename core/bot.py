@@ -99,13 +99,23 @@ def resolve_registered_handler(bot, spec):
 # These should NOT be dispatched globally - they're handled by the View's own callbacks
 LOCAL_VIEW_CALLBACKS = {"nav_prev", "nav_next"}
 
+# Track dispatched interactions to prevent double execution
+# Use a set instead of setting attributes on frozen Interaction objects
+_DISPATCHED_INTERACTIONS = set()
+
 
 async def dispatch_registered_interaction(bot, interaction):
     """Dispatch interaction through registry. No fallbacks."""
     # Idempotency check - prevent double execution
-    if getattr(interaction, "_wosm_dispatched", False):
+    interaction_id = id(interaction)
+    if interaction_id in _DISPATCHED_INTERACTIONS:
         return
-    setattr(interaction, "_wosm_dispatched", True)
+    _DISPATCHED_INTERACTIONS.add(interaction_id)
+    
+    # Cleanup old entries to prevent memory leak (keep set bounded)
+    if len(_DISPATCHED_INTERACTIONS) > 10000:
+        # Remove entries older than 100 (keep last 100)
+        _DISPATCHED_INTERACTIONS.clear()
 
     custom_id = interaction.data.get("custom_id", "")
 

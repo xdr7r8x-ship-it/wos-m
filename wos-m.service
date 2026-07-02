@@ -1,0 +1,18 @@
+[Unit]
+Description=WOS-M Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=openhands
+WorkingDirectory=/workspace/project/wos-m
+EnvironmentFile=/workspace/project/wos-m/.env
+ExecStart=/usr/local/bin/python main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=wos-m
+
+[Install]
+WantedBy=multi-user.target
