@@ -54,10 +54,12 @@ class TestRateLimiter:
     async def test_execute_with_timeout_success(self):
         """Test successful execution with timeout."""
         limiter = RateLimiter()
+
         async def success_coro():
             return "success"
         result = await limiter.execute_with_timeout(success_coro())
 
+        # Verify the result
         assert result == "success"
 
     @pytest.mark.asyncio
