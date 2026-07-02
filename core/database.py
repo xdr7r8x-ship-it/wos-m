@@ -3,11 +3,11 @@ WOS-M Database System
 © MANSOUR — WOS-M. All rights reserved.
 """
 import asyncio
-import aiosqlite
-from datetime import datetime
-from pathlib import Path
-from typing import Optional, Any, List, Tuple
 import logging
+from pathlib import Path
+from typing import Optional, List, Tuple
+
+import aiosqlite
 
 from config.settings import settings
 
@@ -16,59 +16,57 @@ logger = logging.getLogger(__name__)
 
 class Database:
     """Central database manager for WOS-M."""
-    
+
     _instance = None
     _db: Optional[aiosqlite.Connection] = None
     _lock = asyncio.Lock()
-    
+
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     async def initialize(self, db_path: Optional[str] = None):
         """Initialize the database connection and create tables."""
         if self._db is not None:
             return
-            
+
         if db_path is None:
             db_path = settings.database.url.replace("sqlite:///", "")
-        
+
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._db = await aiosqlite.connect(db_path)
         self._db.row_factory = aiosqlite.Row
-        
+
         await self._create_tables()
         await self._run_migrations()
-        
-        logger.info(f"Database initialized at {db_path}")
-    
+        await self._ensure_schema_compatibility()
+
+        logger.info("Database initialized at %s", db_path)
+
     async def _create_tables(self):
         """Create all required tables."""
-        await self._db.executescript("""
-            -- Bot Settings
+        await self._db.executescript(
+            """
             CREATE TABLE IF NOT EXISTS bot_settings (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Language Settings
+
             CREATE TABLE IF NOT EXISTS language_settings (
                 locale TEXT PRIMARY KEY,
                 is_default BOOLEAN DEFAULT 0,
                 is_active BOOLEAN DEFAULT 1,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Theme Settings
+
             CREATE TABLE IF NOT EXISTS theme_settings (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Custom Buttons
+
             CREATE TABLE IF NOT EXISTS custom_buttons (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 button_key TEXT UNIQUE NOT NULL,
@@ -81,8 +79,19 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Custom Texts
+
+            CREATE TABLE IF NOT EXISTS button_configs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                custom_id TEXT UNIQUE NOT NULL,
+                label TEXT NOT NULL,
+                emoji TEXT,
+                enabled BOOLEAN DEFAULT 1,
+                row_position INTEGER DEFAULT 0,
+                created_by TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
             CREATE TABLE IF NOT EXISTS custom_texts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 text_key TEXT UNIQUE NOT NULL,
@@ -90,8 +99,7 @@ class Database:
                 value_en TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Feature Registry
+
             CREATE TABLE IF NOT EXISTS feature_registry (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 feature_key TEXT UNIQUE NOT NULL,
@@ -107,8 +115,7 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Permissions
+
             CREATE TABLE IF NOT EXISTS permissions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 discord_id TEXT NOT NULL,
@@ -119,8 +126,7 @@ class Database:
                 granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(discord_id, guild_id)
             );
-            
-            -- Admins
+
             CREATE TABLE IF NOT EXISTS admins (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 discord_id TEXT UNIQUE NOT NULL,
@@ -130,8 +136,7 @@ class Database:
                 added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_active TIMESTAMP
             );
-            
-            -- Audit Logs
+
             CREATE TABLE IF NOT EXISTS audit_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT NOT NULL,
@@ -142,8 +147,7 @@ class Database:
                 ip_address TEXT,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Process Queue
+
             CREATE TABLE IF NOT EXISTS process_queue (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task_type TEXT NOT NULL,
@@ -158,8 +162,7 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Alliances
+
             CREATE TABLE IF NOT EXISTS alliances (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -175,8 +178,7 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Alliance Settings
+
             CREATE TABLE IF NOT EXISTS alliance_settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 alliance_id INTEGER NOT NULL,
@@ -185,8 +187,7 @@ class Database:
                 FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON DELETE CASCADE,
                 UNIQUE(alliance_id, setting_key)
             );
-            
-            -- Players
+
             CREATE TABLE IF NOT EXISTS players (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fid TEXT UNIQUE NOT NULL,
@@ -200,8 +201,7 @@ class Database:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON DELETE SET NULL
             );
-            
-            -- Player History
+
             CREATE TABLE IF NOT EXISTS player_history (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
@@ -212,8 +212,7 @@ class Database:
                 changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );
-            
-            -- Gift Codes
+
             CREATE TABLE IF NOT EXISTS gift_codes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 code TEXT UNIQUE NOT NULL,
@@ -224,8 +223,7 @@ class Database:
                 redeemed_at TIMESTAMP,
                 FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON DELETE SET NULL
             );
-            
-            -- Gift Redemptions
+
             CREATE TABLE IF NOT EXISTS gift_redemptions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 code_id INTEGER NOT NULL,
@@ -238,8 +236,7 @@ class Database:
                 FOREIGN KEY (code_id) REFERENCES gift_codes(id) ON DELETE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );
-            
-            -- Gift Redemption Batches
+
             CREATE TABLE IF NOT EXISTS gift_redemption_batches (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 code TEXT NOT NULL,
@@ -252,8 +249,7 @@ class Database:
                 completed_at TIMESTAMP,
                 FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON DELETE SET NULL
             );
-            
-            -- Gift Redemption Results
+
             CREATE TABLE IF NOT EXISTS gift_redemption_results (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 batch_id INTEGER NOT NULL,
@@ -265,8 +261,7 @@ class Database:
                 FOREIGN KEY (batch_id) REFERENCES gift_redemption_batches(id) ON DELETE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );
-            
-            -- Events
+
             CREATE TABLE IF NOT EXISTS events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -279,8 +274,7 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Attendance Records
+
             CREATE TABLE IF NOT EXISTS attendance_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 event_id INTEGER NOT NULL,
@@ -291,8 +285,7 @@ class Database:
                 FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );
-            
-            -- Bear Hunts
+
             CREATE TABLE IF NOT EXISTS bear_hunts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 alliance_id INTEGER,
@@ -303,8 +296,7 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON DELETE SET NULL
             );
-            
-            -- Bear Damage Records
+
             CREATE TABLE IF NOT EXISTS bear_damage_records (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 hunt_id INTEGER NOT NULL,
@@ -314,8 +306,7 @@ class Database:
                 FOREIGN KEY (hunt_id) REFERENCES bear_hunts(id) ON DELETE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );
-            
-            -- Notifications
+
             CREATE TABLE IF NOT EXISTS notifications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
@@ -332,8 +323,7 @@ class Database:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Ministers
+
             CREATE TABLE IF NOT EXISTS ministers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
@@ -347,8 +337,7 @@ class Database:
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE SET NULL,
                 FOREIGN KEY (alliance_id) REFERENCES alliances(id) ON DELETE SET NULL
             );
-            
-            -- Minister Assignment History
+
             CREATE TABLE IF NOT EXISTS minister_assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 minister_id INTEGER NOT NULL,
@@ -359,8 +348,7 @@ class Database:
                 FOREIGN KEY (minister_id) REFERENCES ministers(id) ON DELETE CASCADE,
                 FOREIGN KEY (player_id) REFERENCES players(id) ON DELETE CASCADE
             );
-            
-            -- Backups
+
             CREATE TABLE IF NOT EXISTS backups (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 backup_type TEXT NOT NULL,
@@ -368,42 +356,61 @@ class Database:
                 created_by TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            
-            -- Create indexes
+
             CREATE INDEX IF NOT EXISTS idx_players_fid ON players(fid);
             CREATE INDEX IF NOT EXISTS idx_players_alliance ON players(alliance_id);
             CREATE INDEX IF NOT EXISTS idx_gift_codes_status ON gift_codes(status);
             CREATE INDEX IF NOT EXISTS idx_process_queue_status ON process_queue(status);
             CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON audit_logs(timestamp);
             CREATE INDEX IF NOT EXISTS idx_custom_buttons_position ON custom_buttons(position);
-        """)
+            CREATE INDEX IF NOT EXISTS idx_button_configs_custom_id ON button_configs(custom_id);
+            """
+        )
         await self._db.commit()
-    
+
     async def _run_migrations(self):
         """Run any pending migrations."""
-        # Create migrations tracking table
-        await self._db.execute("""
+        await self._db.execute(
+            """
             CREATE TABLE IF NOT EXISTS _migrations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT UNIQUE NOT NULL,
                 applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
-        
-        # Get applied migrations
+            """
+        )
+
         async with self._db.execute("SELECT name FROM _migrations") as cursor:
             applied = {row[0] for row in await cursor.fetchall()}
-        
+
         migrations = [
             {
                 "name": "add_redemption_unique",
                 "sql": """
-                    CREATE UNIQUE INDEX IF NOT EXISTS idx_redemption_unique 
+                    CREATE UNIQUE INDEX IF NOT EXISTS idx_redemption_unique
                     ON gift_redemptions(code_id, player_id);
-                """
-            }
+                """,
+            },
+            {
+                "name": "add_button_configs",
+                "sql": """
+                    CREATE TABLE IF NOT EXISTS button_configs (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        custom_id TEXT UNIQUE NOT NULL,
+                        label TEXT NOT NULL,
+                        emoji TEXT,
+                        enabled BOOLEAN DEFAULT 1,
+                        row_position INTEGER DEFAULT 0,
+                        created_by TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_button_configs_custom_id
+                    ON button_configs(custom_id);
+                """,
+            },
         ]
-        
+
         for migration in migrations:
             if migration["name"] not in applied:
                 try:
@@ -413,46 +420,58 @@ class Database:
                             await self._db.execute(stmt)
                     await self._db.execute(
                         "INSERT INTO _migrations (name) VALUES (?)",
-                        (migration["name"],)
+                        (migration["name"],),
                     )
                     await self._db.commit()
-                    logger.info(f"Migration applied: {migration['name']}")
+                    logger.info("Migration applied: %s", migration["name"])
                 except Exception as e:
-                    logger.warning(f"Migration {migration['name']}: {e}")
+                    logger.warning("Migration %s failed: %s", migration["name"], e)
                     await self._db.rollback()
-    
+
+    async def _ensure_schema_compatibility(self):
+        """Ensure columns used by active handlers exist on upgraded databases."""
+        columns = await self.fetchall("PRAGMA table_info(button_configs)")
+        column_names = {column["name"] for column in columns}
+
+        if "row_position" not in column_names:
+            await self.execute(
+                "ALTER TABLE button_configs ADD COLUMN row_position INTEGER DEFAULT 0"
+            )
+            await self.commit()
+            logger.info("Schema compatibility applied: button_configs.row_position")
+
     async def execute(self, query: str, parameters: Tuple = ()) -> aiosqlite.Cursor:
         """Execute a query."""
         return await self._db.execute(query, parameters)
-    
+
     async def executemany(self, query: str, parameters: List[Tuple]) -> aiosqlite.Cursor:
         """Execute many queries."""
         return await self._db.executemany(query, parameters)
-    
+
     async def fetchone(self, query: str, parameters: Tuple = ()) -> Optional[aiosqlite.Row]:
         """Fetch one row."""
         async with self._db.execute(query, parameters) as cursor:
             return await cursor.fetchone()
-    
+
     async def fetchall(self, query: str, parameters: Tuple = ()) -> List[aiosqlite.Row]:
         """Fetch all rows."""
         async with self._db.execute(query, parameters) as cursor:
             return await cursor.fetchall()
-    
+
     async def commit(self):
         """Commit changes."""
         await self._db.commit()
-    
+
     async def rollback(self):
         """Rollback changes."""
         await self._db.rollback()
-    
+
     async def close(self):
         """Close the database connection."""
         if self._db:
             await self._db.close()
             self._db = None
-    
+
     @property
     def connection(self) -> aiosqlite.Connection:
         """Get the database connection."""
