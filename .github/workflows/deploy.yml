@@ -1,0 +1,37 @@
+name: Run WOS-M Bot 24/7
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create .env with secrets
+        run: |
+          cat > .env << 'ENVEOF'
+          DISCORD_BOT_TOKEN=${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_APPLICATION_ID=${{ secrets.DISCORD_APPLICATION_ID || '0' }}
+          OWNER_DISCORD_ID=${{ secrets.OWNER_DISCORD_ID || '0' }}
+          WOSM_DEMO_MODE=false
+          DEFAULT_LANGUAGE=ar
+          DATABASE_URL=sqlite:///data/wosm.sqlite
+          WOS_GIFT_PUBLIC_ENDPOINT=https://wos-giftcode-api.centurygame.com
+          WOS_PLAYER_PUBLIC_ENDPOINT=https://wos-giftcode-api.centurygame.com
+          REAL_REDEMPTION_PROVIDER=WhiteoutProject
+          LOG_LEVEL=INFO
+          ENVEOF
+
+      - name: Run Bot
+        run: python main.py
