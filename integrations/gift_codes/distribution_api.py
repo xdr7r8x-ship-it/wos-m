@@ -12,6 +12,7 @@ import asyncio
 import json
 import logging
 import random
+import os
 import re
 import sqlite3
 import ssl
@@ -19,6 +20,7 @@ from datetime import datetime
 from typing import List, Tuple, Optional
 
 import aiohttp
+import discord as discord_module
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +38,7 @@ class GiftDistributionAPI:
         
         # API Configuration
         self.api_url = "http://gift-code-api.whiteout-bot.com/giftcode_api.php"
-        self.api_key = "super_secret_bot_token_nobody_will_ever_find"
+        self.api_key = os.environ.get("GIFT_API_KEY", "")
         
         # Rate limiting
         self.min_check_interval = 300  # 5 minutes
@@ -330,9 +332,9 @@ class GiftDistributionAPI:
             
             for (channel_id,) in channels:
                 channel = self.bot.get_channel(channel_id)
-                if channel and isinstance(channel, discord.TextChannel):
+                if channel and isinstance(channel, discord_module.TextChannel):
                     try:
-                        embed = discord.Embed(
+                        embed = discord_module.Embed(
                             title="🎁 كود هدية جديد",
                             description=f"**الكود:** `{code}`\n**التاريخ:** {date}",
                             color=0x00ff00

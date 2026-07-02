@@ -32,7 +32,8 @@ def find_all_callbacks():
             continue
         for f in path.rglob("*.py"):
             content = f.read_text()
-            for m in re.finditer(r'(async\s+)?def\s+(callback_[a-zA-Z0-9_]+)\s*\(', content):
+            # Look for both callback_* and _handle_* patterns
+            for m in re.finditer(r'(async\s+)?def\s+(_?(?:callback|handle)_[a-zA-Z0-9_]+)\s*\(', content):
                 name = m.group(2)
                 if name not in callbacks:
                     callbacks[name] = []
@@ -158,6 +159,20 @@ def main():
     custom_ids = find_all_custom_ids()
     callbacks = find_all_callbacks()
     registrations = find_all_registrations()
+    
+    # Also check for @discord.ui.callback decorated callbacks
+    for path in (BASE / "modules",):
+        if not path.exists():
+            continue
+        for f in path.rglob("*.py"):
+            file_content = f.read_text()
+            for m in re.finditer(r'@discord\.ui\.callback\("([^"]+)"\)\s*async def\s+(\w+)_callback', file_content):
+                custom_id = m.group(1)
+                callback_name = m.group(2)
+                if custom_id not in registrations:
+                    registrations[custom_id] = f"decorated:{f.name}"
+                if callback_name not in callbacks:
+                    callbacks[callback_name] = [str(f.relative_to(BASE))]
     
     print(f"\nFound {len(custom_ids)} unique custom_ids")
     print(f"Found {len(callbacks)} unique callbacks")

@@ -255,9 +255,11 @@ async def batch_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
 
             embed = discord.Embed(
                 title="📊 تقرير الاسترداد الجماعي",
-                description=f"**النجاح:** {results['success']}\n"
-                           f"**الفشل:** {results['failed']}\n"
-                           f"**المتروك:** {results['skipped']}",
+                description=(
+                    f"**النجاح:** {results['success']}\n"
+                    f"**الفشل:** {results['failed']}\n"
+                    f"**المتروك:** {results['skipped']}"
+                ),
                 color=0x3498db
             )
 
@@ -382,8 +384,10 @@ async def alliance_redeem_callback(bot: WOSMBot, interaction: discord.Interactio
 
     embed = discord.Embed(
         title="📊 تقرير الاسترداد للأونلاين",
-        description=f"**النجاح:** {results['success']}\n"
-                   f"**الفشل:** {results['failed']}",
+        description=(
+            f"**النجاح:** {results['success']}\n"
+            f"**الفشل:** {results['failed']}"
+        ),
         color=0x3498db
     )
 

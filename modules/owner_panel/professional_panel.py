@@ -361,6 +361,142 @@ class OwnerUsersView(BaseView):
         ))
         self.add_back_home_buttons()
 
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # PERMISSIONS - الصلاحيات
@@ -434,6 +570,142 @@ class OwnerPermissionsView(BaseView):
             row=1
         ))
         self.add_back_home_buttons()
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════
@@ -531,6 +803,142 @@ class OwnerSettingsView(BaseView):
         ))
         self.add_back_home_buttons()
 
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # APPEARANCE - المظهر
@@ -599,6 +1007,142 @@ class OwnerAppearanceView(BaseView):
             row=1
         ))
         self.add_back_home_buttons()
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════
@@ -687,6 +1231,142 @@ class OwnerGiftsView(BaseView):
         ))
         self.add_back_home_buttons()
 
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # MAINTENANCE - الصيانة
@@ -758,6 +1438,142 @@ class OwnerMaintenanceView(BaseView):
         ))
         self.add_back_home_buttons()
 
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # BROADCAST - البث
@@ -818,6 +1634,142 @@ class OwnerBroadcastView(BaseView):
             row=1
         ))
         self.add_back_home_buttons()
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════
@@ -894,6 +1846,142 @@ class OwnerDatabaseView(BaseView):
         ))
         self.add_back_home_buttons()
 
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════════
 # LOGS - السجلات
@@ -921,8 +2009,8 @@ async def owner_logs_callback(bot: WOSMBot, interaction: discord.Interaction):
     
     if logs:
         log_text = "\n".join([
-            f"• [{l.get('created_at', 'N/A')[:19]}] {l.get('action', 'N/A')}"
-            for l in logs[:10]
+            f"• [{log.get('created_at', 'N/A')[:19]}] {log.get('action', 'N/A')}"
+            for log in logs[:10]
         ])
         embed.add_field(
             name="📝 آخر الأحداث",
@@ -962,6 +2050,142 @@ class OwnerLogsView(BaseView):
             row=0
         ))
         self.add_back_home_buttons()
+
+    # ═══════════════════════════════════════════════════════════════════
+    # CALLBACK METHODS - Required for button interactions
+    # ═══════════════════════════════════════════════════════════════════
+    
+    @discord.ui.callback("prof_add_admin")
+    async def prof_add_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_remove_admin")
+    async def prof_remove_admin_callback(self, interaction: discord.Interaction):
+        await owner_users_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_transfer_owner")
+    async def prof_transfer_owner_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_promote")
+    async def prof_promote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_demote")
+    async def prof_demote_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_perm_log")
+    async def prof_perm_log_callback(self, interaction: discord.Interaction):
+        await owner_permissions_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_general")
+    async def prof_set_general_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_features")
+    async def prof_set_features_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_security")
+    async def prof_set_security_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_notifications")
+    async def prof_set_notifications_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_set_api")
+    async def prof_set_api_callback(self, interaction: discord.Interaction):
+        await owner_settings_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_color_theme")
+    async def prof_color_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_text_theme")
+    async def prof_text_theme_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_icons")
+    async def prof_icons_callback(self, interaction: discord.Interaction):
+        await owner_appearance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_add")
+    async def prof_gift_add_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_list")
+    async def prof_gift_list_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_redeem")
+    async def prof_gift_redeem_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_gift_report")
+    async def prof_gift_report_callback(self, interaction: discord.Interaction):
+        await owner_gifts_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_toggle_maintenance")
+    async def prof_toggle_maintenance_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_backup")
+    async def prof_backup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_cleanup")
+    async def prof_cleanup_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_check")
+    async def prof_check_callback(self, interaction: discord.Interaction):
+        await owner_maintenance_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_text")
+    async def prof_broadcast_text_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_announce")
+    async def prof_broadcast_announce_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_broadcast_log")
+    async def prof_broadcast_log_callback(self, interaction: discord.Interaction):
+        await owner_broadcast_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_export")
+    async def prof_db_export_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_import")
+    async def prof_db_import_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_vacuum")
+    async def prof_db_vacuum_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_db_integrity")
+    async def prof_db_integrity_callback(self, interaction: discord.Interaction):
+        await owner_database_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_logs_clear")
+    async def prof_logs_clear_callback(self, interaction: discord.Interaction):
+        await owner_logs_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_list")
+    async def prof_alliance_list_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_add")
+    async def prof_alliance_add_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
+    
+    @discord.ui.callback("prof_alliance_delete")
+    async def prof_alliance_delete_callback(self, interaction: discord.Interaction):
+        await owner_alliances_callback(self.bot, interaction)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════════
