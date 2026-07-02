@@ -170,7 +170,6 @@ async def settings_callback(bot: WOSMBot, interaction: discord.Interaction):
                 icon="⚙️",
                 color=0x3498db
             ))
-            self._add_buttons()
             self.add_back_home_buttons()
     view = SettingsView(bot, interaction.user.id)
     embed = view.create_embed()
