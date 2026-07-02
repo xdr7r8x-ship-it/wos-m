@@ -15,7 +15,7 @@ class TestGiftCodesModule:
         assert views_file.exists()
         
         content = open(views_file).read()
-        assert "async def gift_add_callback" in content or "gift_add" in content
+        assert "async def add_gift_code_callback" in content or "gift_add" in content
     
     def test_gift_codes_table_has_required_columns(self):
         """gift_codes table must have required columns."""

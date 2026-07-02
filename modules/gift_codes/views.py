@@ -1,145 +1,26 @@
 """
-WOS-M Gift Codes Views
+WOS-M Gift Codes Module Views
 © MANSOUR — WOS-M. All rights reserved.
 """
+import asyncio
 import discord
-from discord import ui
-from typing import Dict, Any, List, Optional
+from discord import ui, ButtonStyle
+from typing import Optional, List
 
 from core.bot import WOSMBot
 from core.i18n import i18n
 from core.database import db
 from core.permissions import PermissionLevel, PermissionGuard
 from core.audit_log import audit_log, AuditCategory
+from core.interaction_registry import INTERACTION_REGISTRY
 from views.base import BaseView, PageInfo
-from views.buttons import ActionButton
-from modules.gift_codes.panel import GiftCodesPanelView, BatchRedeemView
-from modules.gift_codes.service import gift_code_service
-from modules.gift_codes.redemption_engine import redemption_engine
-from modules.gift_codes.batch_runner import batch_runner
-
-
-class GiftCodesView(BaseView):
-    """Gift codes main view."""
-    
-    def __init__(self, bot: WOSMBot, user_id: int):
-        self.bot = bot
-        super().__init__(
-            user_id=user_id,
-            page_info=PageInfo(
-                title=i18n.get("gift_codes.title"),
-                description="",
-                icon="🎁",
-                color=0x2ecc71
-            )
-        )
-        
-        self._add_buttons()
-        self.add_back_home_buttons()
-    
-    def _add_buttons(self):
-        """Add management buttons."""
-        self.add_item(ActionButton(
-            label=i18n.get("gift_codes.add_code"),
-            custom_id="gift_add",
-            style=discord.ButtonStyle.success,
-            emoji="➕",
-            row=0
-        ))
-        
-        self.add_item(ActionButton(
-            label=i18n.get("gift_codes.redeem_title"),
-            custom_id="gift_redeem_single",
-            style=discord.ButtonStyle.primary,
-            emoji="🎁",
-            row=0
-        ))
-        
-        self.add_item(ActionButton(
-            label=i18n.get("gift_codes.batch_redeem"),
-            custom_id="gift_batch",
-            style=discord.ButtonStyle.primary,
-            emoji="📦",
-            row=0
-        ))
-        
-        self.add_item(ActionButton(
-            label=i18n.get("gift_codes.redeem_alliance"),
-            custom_id="gift_redeem_alliance",
-            style=discord.ButtonStyle.success,
-            emoji="🏰",
-            row=1
-        ))
-        
-        self.add_item(ActionButton(
-            label=i18n.get("gift_codes.auto_redeem"),
-            custom_id="gift_auto",
-            style=discord.ButtonStyle.success,
-            emoji="🤖",
-            row=1
-        ))
-        
-        self.add_item(ActionButton(
-            label=i18n.get("gift_codes.report"),
-            custom_id="gift_report",
-            style=discord.ButtonStyle.secondary,
-            emoji="📋",
-            row=2
-        ))
-
-
-class SingleRedeemModal(ui.Modal):
-    """Modal for single code redemption with FID."""
-    
-    def __init__(self):
-        super().__init__(
-            title=i18n.get("gift_codes.manual_redeem"),
-            custom_id="single_redeem_modal"
-        )
-        
-        self.code_input = ui.TextInput(
-            label=i18n.get("gift_codes.code"),
-            placeholder="WOSM123456",
-            required=True,
-            max_length=50
-        )
-        
-        self.fid_input = ui.TextInput(
-            label=i18n.get("players.fid"),
-            placeholder="12345678",
-            required=True,
-            max_length=50
-        )
-        
-        self.add_item(self.code_input)
-        self.add_item(self.fid_input)
-
-
-class AllianceRedeemModal(ui.Modal):
-    """Modal for alliance code redemption."""
-    
-    def __init__(self):
-        super().__init__(
-            title=i18n.get("gift_codes.redeem_alliance"),
-            custom_id="alliance_redeem_modal"
-        )
-        
-        self.code_input = ui.TextInput(
-            label=i18n.get("gift_codes.code"),
-            placeholder="WOSM123456",
-            required=True,
-            max_length=50
-        )
-        
-        self.add_item(self.code_input)
+from views.buttons import DashboardButton, ActionButton
 
 
 async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Main gift codes callback - shows gift codes dashboard."""
-    from discord import ButtonStyle
-    from views.buttons import DashboardButton
     from config.settings import settings
-    
+
     embed = discord.Embed(
         title="🎁 إدارة أكواد الهدايا",
         description="اختر الإجراء المطلوب:",
@@ -148,59 +29,67 @@ async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     embed.add_field(name="➕ إضافة كود", value="إضافة كود هدية جديد", inline=False)
     embed.add_field(name="🎫 استرداد فردي", value="استرداد كود لعضو واحد", inline=False)
     embed.add_field(name="📦 استرداد جماعي", value="استرداد أكواد متعددة", inline=False)
-    embed.add_field(name="🏰 استرداد للألوان", value="استرداد أكواد للأونلاين", inline=False)
+    embed.add_field(name="🏰 استرداد للأونلاين", value="استرداد أكواد للأونلاين", inline=False)
     embed.add_field(name="⚙️ تلقائي", value="إدارة الاسترداد التلقائي", inline=False)
     embed.add_field(name="📊 التقرير", value="عرض تقرير الأكواد", inline=False)
-    
+
     view = BaseView(user_id=interaction.user.id, timeout=300)
+    
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="➕ إضافة كود",
         custom_id="gift_dash_add",
-        emoji="➕"
+        emoji="➕",
+        row=0
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="🎫 استرداد فردي",
         custom_id="gift_dash_single",
-        emoji="🎫"
+        emoji="🎫",
+        row=0
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="📦 استرداد جماعي",
         custom_id="gift_dash_batch",
-        emoji="📦"
+        emoji="📦",
+        row=0
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.secondary,
         label="🏰 للأونلاين",
         custom_id="gift_dash_alliance",
-        emoji="🏰"
+        emoji="🏰",
+        row=1
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.secondary,
         label="⚙️ تلقائي",
         custom_id="gift_dash_auto",
-        emoji="⚙️"
+        emoji="⚙️",
+        row=1
     ))
     view.add_item(DashboardButton(
         style=ButtonStyle.secondary,
         label="📊 التقرير",
         custom_id="gift_dash_report",
-        emoji="📊"
+        emoji="📊",
+        row=1
     ))
-    
+    view.add_back_home_buttons()
+
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
 async def add_gift_code_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Add gift code callback - Open modal to add a new gift code."""
     guard = PermissionGuard(bot)
-    
+
     if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
         await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
         return
-    
+
     class AddCodeModal(ui.Modal, title="إضافة كود هدية"):
         code_input = ui.TextInput(
             label="الكود",
@@ -217,77 +106,52 @@ async def add_gift_code_callback(bot: WOSMBot, interaction: discord.Interaction)
         value_input = ui.TextInput(
             label="القيمة",
             placeholder="مثال: 100 أو premium_7d",
-            required=True
+            required=False
         )
-        
-        async def on_submit(self, interaction: discord.Interaction):
-            try:
-                code = self.code_input.value.strip().upper()
-                code_type = self.type_input.value.strip()
-                value = self.value_input.value.strip()
-                
-                # Check if code already exists
-                existing = await gift_code_service.get_code_by_code(code)
-                if existing:
-                    await interaction.response.send_message(
-                        f"❌ الكود `{code}` موجود مسبقاً",
-                        ephemeral=True
-                    )
-                    return
-                
-                # Add the code
-                from modules.gift_codes.models import GiftCodeStatus
-                await gift_code_service.create_code(
-                    code=code,
-                    code_type=code_type,
-                    value=value,
-                    created_by=str(interaction.user.id)
-                )
-                
-                await interaction.response.send_message(
-                    f"✅ تم إضافة الكود `{code}` بنجاح",
-                    ephemeral=True
-                )
-                
-                await audit_log.log(
-                    user_id=str(interaction.user.id),
-                    user_name=str(interaction.user),
-                    action=f"add_gift_code:{code}",
-                    category=AuditCategory.GIFT_CODES,
-                    details={"code": code, "type": code_type, "value": value}
-                )
-                
-            except Exception:
-                import logging
-                logging.exception("add_gift_code failed")
-                await interaction.response.send_message(
-                    "❌ حدث خطأ أثناء إضافة الكود",
-                    ephemeral=True
-                )
-        
-        async def on_error(self, interaction: discord.Interaction, error: Exception):
-            import logging
-            logging.exception("add_gift_code modal error")
-            try:
-                await interaction.response.send_message(
-                    f"❌ خطأ: {str(error)[:100]}",
-                    ephemeral=True
-                )
-            except:
-                pass
-    
+
+        async def callback(self, modal_interaction: discord.Interaction):
+            code = self.code_input.value.strip().upper()
+            code_type = self.type_input.value.strip()
+            value = self.value_input.value.strip() if self.value_input.value else None
+
+            if not code:
+                await modal_interaction.response.send_message("❌ الكود مطلوب", ephemeral=True)
+                return
+
+            from datetime import datetime
+            now = datetime.now().isoformat()
+            
+            await db.execute("""
+                INSERT OR REPLACE INTO gift_codes 
+                (code, code_type, value, status, created_at)
+                VALUES (?, ?, ?, 'active', ?)
+            """, (code, code_type, value, now))
+            await db.commit()
+
+            await audit_log.log(
+                modal_interaction.user.id,
+                AuditCategory.GIFT_CODE,
+                f"Added gift code: {code}",
+                modal_interaction.guild_id
+            )
+
+            await modal_interaction.response.send_message(
+                f"✅ تم إضافة الكود: `{code}`",
+                ephemeral=True
+            )
+
     await interaction.response.send_modal(AddCodeModal())
 
 
-async def redeem_single_code_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Redeem single code callback - Open modal for single redemption."""
+async def single_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Single code redemption callback."""
     guard = PermissionGuard(bot)
-    
-    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.MEMBER):
+
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
         await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
         return
-    
-    class RedeemSingleModal(ui.Modal, title="استرداد كود فردي"):
+
+    class RedeemModal(ui.Modal, title="استرداد كود فردي"):
         code_input = ui.TextInput(
             label="الكود",
             placeholder="أدخل كود الهدية",
@@ -295,418 +159,232 @@ async def redeem_single_code_callback(bot: WOSMBot, interaction: discord.Interac
             min_length=3,
             max_length=50
         )
-        fid_input = ui.TextInput(
-            label="FID اللاعب",
-            placeholder="معرف اللاعب",
-            required=True,
-            min_length=8,
-            max_length=20
+        player_id_input = ui.TextInput(
+            label="معرف اللاعب",
+            placeholder="أدخل معرف اللاعب",
+            required=True
         )
-        
-        async def on_submit(self, interaction: discord.Interaction):
-            try:
-                code = self.code_input.value.strip().upper()
-                player_fid = self.fid_input.value.strip()
-                
-                # Get player by FID
-                player = await db.fetchone(
-                    "SELECT id, fid, name FROM players WHERE fid = ?",
-                    (player_fid,)
-                )
-                
-                if not player:
-                    await interaction.response.send_message(
-                        f"❌ لم يتم العثور على لاعب بهذا FID: `{player_fid}`",
-                        ephemeral=True
-                    )
-                    return
-                
-                # Redeem the code
-                result = await redemption_engine.redeem_code(
-                    code=code,
-                    player_id=player['id'],
-                    player_fid=player_fid
-                )
-                
-                if result.get("success"):
-                    await interaction.response.send_message(
-                        f"✅ تم استرداد الكود `{code}` بنجاح للاعب {player['name'] if 'name' in player.keys() else player_fid}!",
-                        ephemeral=True
-                    )
-                else:
-                    await interaction.response.send_message(
-                        f"❌ فشل استرداد الكود: {result.get('message', 'خطأ غير معروف')}",
-                        ephemeral=True
-                    )
-                
-                await audit_log.log(
-                    user_id=str(interaction.user.id),
-                    user_name=str(interaction.user),
-                    action=f"redeem_single:{code}",
-                    category=AuditCategory.GIFT_CODES,
-                    details={"code": code, "player_fid": player_fid, "success": result.get("success")}
-                )
-                
-            except Exception:
-                import logging
-                logging.exception("redeem_single failed")
-                await interaction.response.send_message(
-                    "❌ حدث خطأ أثناء استرداد الكود",
+
+        async def callback(self, modal_interaction: discord.Interaction):
+            code = self.code_input.value.strip().upper()
+            player_id = self.player_id_input.value.strip()
+
+            if not code or not player_id:
+                await modal_interaction.response.send_message(
+                    "❌ الكود ومعرف اللاعب مطلوبان",
                     ephemeral=True
                 )
-        
-        async def on_error(self, interaction: discord.Interaction, error: Exception):
-            import logging
-            logging.exception("redeem_single modal error")
-            try:
-                await interaction.response.send_message(
-                    f"❌ خطأ: {str(error)[:100]}",
-                    ephemeral=True
+                return
+
+            from integrations.gift_codes import GiftCodeService
+            service = GiftCodeService(bot, db.conn)
+            
+            await modal_interaction.response.send_message(
+                f"⏳ جاري استرداد الكود `{code}` للاعب `{player_id}`...",
+                ephemeral=True
+            )
+
+            success, msg = await service.redeem_code(code, player_id)
+
+            if success:
+                embed = discord.Embed(
+                    title="✅ تم الاسترداد بنجاح!",
+                    description=f"**الكود:** `{code}`\n**اللاعب:** `{player_id}`",
+                    color=0x00ff00
                 )
-            except:
-                pass
-    
-    await interaction.response.send_modal(RedeemSingleModal())
+            else:
+                embed = discord.Embed(
+                    title="❌ فشل الاسترداد",
+                    description=f"**الكود:** `{code}`\n**السبب:** {msg}",
+                    color=0xff0000
+                )
+
+            await modal_interaction.edit_original_response(embed=embed)
+
+    await interaction.response.send_modal(RedeemModal())
 
 
 async def batch_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Batch redeem callback - Show batch redeem view."""
+    """Batch code redemption callback."""
     guard = PermissionGuard(bot)
-    
+
     if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
         await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
         return
+
+    class BatchModal(ui.Modal, title="استرداد جماعي"):
+        codes_input = ui.TextInput(
+            label="الأكواد",
+            placeholder="أدخل الأكواد مفصولة بسطر جديد",
+            style=discord.TextStyle.paragraph,
+            required=True
+        )
+        player_ids_input = ui.TextInput(
+            label="معرفات اللاعبين",
+            placeholder="أدخل معرفات اللاعبين مفصولة بسطر جديد",
+            style=discord.TextStyle.paragraph,
+            required=True
+        )
+
+        async def callback(self, modal_interaction: discord.Interaction):
+            codes = [c.strip().upper() for c in self.codes_input.value.split('\n') if c.strip()]
+            player_ids = [p.strip() for p in self.player_ids_input.value.split('\n') if p.strip()]
+
+            if not codes or not player_ids:
+                await modal_interaction.response.send_message(
+                    "❌ الأكواد ومعرفات اللاعبين مطلوبة",
+                    ephemeral=True
+                )
+                return
+
+            await modal_interaction.response.send_message(
+                f"⏳ جاري استرداد {len(codes)} كود لـ {len(player_ids)} لاعب...",
+                ephemeral=True
+            )
+
+            from integrations.gift_codes import GiftCodeService
+            service = GiftCodeService(bot, db.conn)
+
+            results = {"success": 0, "failed": 0, "skipped": 0}
+            
+            for code in codes:
+                result = await service.batch_redeem(code, player_ids)
+                results["success"] += result.get("success", 0)
+                results["failed"] += result.get("failed", 0)
+                results["skipped"] += result.get("skipped", 0)
+
+            embed = discord.Embed(
+                title="📊 تقرير الاسترداد الجماعي",
+                description=f"**النجاح:** {results['success']}\n"
+                           f"**الفشل:** {results['failed']}\n"
+                           f"**المتروك:** {results['skipped']}",
+                color=0x3498db
+            )
+
+            await modal_interaction.edit_original_response(embed=embed)
+
+    await interaction.response.send_modal(BatchModal())
+
+
+async def report_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Show gift codes report."""
+    from integrations.gift_codes import GiftCodeService
+    service = GiftCodeService(bot, db.conn)
     
-    view = BatchRedeemView(bot, interaction.user.id)
-    embed = view.create_embed()
+    stats = service.get_stats()
+    codes = service.get_codes(limit=10)
+    
+    embed = discord.Embed(
+        title="📊 تقرير أكواد الهدايا",
+        description="إحصائيات نظام أكواد الهدايا",
+        color=0x3498db
+    )
+    
+    embed.add_field(
+        name="📈 الإحصائيات",
+        value=f"**الإجمالي:** {stats['total_codes']}\n"
+              f"**النشط:** {stats['active_codes']}\n"
+              f"**المسترد:** {stats['redeemed_codes']}\n"
+              f"**الصالح:** {stats['validated_codes']}\n"
+              f"**الملغي:** {stats['invalid_codes']}",
+        inline=True
+    )
+    
+    embed.add_field(
+        name="🔧 الحالة",
+        value=f"**محلل الكابتشا:** {'✅ جاهز' if stats['captcha_solver_ready'] else '❌ غير جاهز'}\n"
+              f"**الاسترداد التلقائي:** {'✅ مفعّل' if stats['auto_redeem_enabled'] else '❌ معطّل'}",
+        inline=True
+    )
+    
+    if codes:
+        codes_text = "\n".join([f"`{c['code']}` - {c['status']}" for c in codes[:5]])
+        embed.add_field(name="🔔 آخر الأكواد", value=codes_text, inline=False)
+    
+    view = BaseView(user_id=interaction.user.id)
+    view.add_back_home_buttons()
     
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
-    
-    await audit_log.log(
-        user_id=str(interaction.user.id),
-        user_name=str(interaction.user),
-        action="view_batch_redeem",
-        category=AuditCategory.GIFT_CODES
-    )
-
-
-async def redeem_alliance_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Redeem alliance callback - Open modal for alliance redemption."""
-    guard = PermissionGuard(bot)
-    
-    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ALLIANCE_ADMIN):
-        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
-        return
-    
-    class AllianceRedeemModal(ui.Modal, title="استرداد كود للتحالف"):
-        alliance_id_input = ui.TextInput(
-            label="معرف التحالف",
-            placeholder="أدخل معرف التحالف",
-            required=True,
-            min_length=1,
-            max_length=50
-        )
-        code_input = ui.TextInput(
-            label="الكود",
-            placeholder="أدخل كود الهدية",
-            required=True,
-            min_length=3,
-            max_length=50
-        )
-        
-        async def on_submit(self, interaction: discord.Interaction):
-            try:
-                alliance_id = self.alliance_id_input.value.strip()
-                code = self.code_input.value.strip().upper()
-                
-                # Get alliance
-                alliance = await db.fetchone(
-                    "SELECT * FROM alliances WHERE id = ?",
-                    (alliance_id,)
-                )
-                
-                if not alliance:
-                    await interaction.response.send_message(
-                        f"❌ التحالف `{alliance_id}` غير موجود",
-                        ephemeral=True
-                    )
-                    return
-                
-                # Redeem via logic layer
-                from modules.gift_codes.logic import redeem_gift_code
-                success, msg = await redeem_gift_code(code, alliance_id)
-                
-                if success:
-                    await interaction.response.send_message(
-                        f"✅ {msg}",
-                        ephemeral=True
-                    )
-                else:
-                    await interaction.response.send_message(
-                        f"❌ {msg}",
-                        ephemeral=True
-                    )
-                
-                await audit_log.log(
-                    user_id=str(interaction.user.id),
-                    user_name=str(interaction.user),
-                    action=f"redeem_alliance:{code}",
-                    category=AuditCategory.GIFT_CODES,
-                    details={"code": code, "alliance_id": alliance_id, "success": success}
-                )
-                
-            except Exception:
-                import logging
-                logging.exception("redeem_alliance failed")
-                await interaction.response.send_message(
-                    "❌ حدث خطأ أثناء استرداد الكود",
-                    ephemeral=True
-                )
-        
-        async def on_error(self, interaction: discord.Interaction, error: Exception):
-            import logging
-            logging.exception("redeem_alliance modal error")
-            try:
-                await interaction.response.send_message(
-                    f"❌ خطأ: {str(error)[:100]}",
-                    ephemeral=True
-                )
-            except:
-                pass
-    
-    await interaction.response.send_modal(AllianceRedeemModal())
 
 
 async def auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Auto redeem settings callback - Configure auto-redeem settings."""
+    """Auto redemption settings callback."""
     guard = PermissionGuard(bot)
-    
+
     if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
         await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
         return
-    
-    await interaction.response.send_message("⏳ جاري تحميل الإعدادات...", ephemeral=True)
-    
-    try:
-        # Get current auto-redeem settings
-        settings = await db.fetchall("""
-            SELECT key, value FROM bot_settings WHERE key LIKE 'auto_redeem_%'
-        """)
-        
-        embed = discord.Embed(
-            title="⚙️ إعدادات الاسترداد التلقائي",
-            description="إعدادات الاسترداد التلقائي الحالية:",
-            color=0x2ecc71
-        )
-        
-        default_settings = {
-            "auto_redeem_enabled": "مفعّل",
-            "auto_redeem_delay": "تأخير (ثواني)",
-            "auto_redeem_max_daily": "الحد الأقصى يومياً",
-        }
-        
-        settings_dict = {s['key']: s['value'] for s in settings}
-        
-        for key, desc in default_settings.items():
-            value = settings_dict.get(key, 'غير مفعّل' if 'enabled' in key else '0')
-            embed.add_field(name=desc, value=f"`{value}`", inline=True)
-        
-        embed.add_field(
-            name="📝",
-            value="للتعديل، استخدم أوامر الإدارة",
-            inline=False
-        )
-        
-        await interaction.edit_original_response(embed=embed)
-        
-        await audit_log.log(
-            user_id=str(interaction.user.id),
-            user_name=str(interaction.user),
-            action="view_auto_redeem_settings",
-            category=AuditCategory.GIFT_CODES
-        )
-        
-    except Exception:
-        import logging
-        logging.exception("auto_redeem failed")
-        await interaction.edit_original_response(
-            content="❌ حدث خطأ أثناء تحميل الإعدادات"
-        )
 
-
-async def gift_report_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Gift codes report callback - Show redemption statistics."""
-    guard = PermissionGuard(bot)
+    from integrations.gift_codes import GiftCodeService
+    service = GiftCodeService(bot, db.conn)
     
-    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.MEMBER):
-        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
-        return
+    current = service.settings.get('auto_redeem_enabled', False)
+    service.save_setting('auto_redeem_enabled', not current)
     
-    await interaction.response.send_message("⏳ جاري تحميل التقرير...", ephemeral=True)
-    
-    try:
-        # Get statistics
-        total_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes")
-        used_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = 'redeemed'")
-        pending_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = 'pending'")
-        total_redemptions = await db.fetchone("SELECT COUNT(*) as count FROM gift_redemptions")
-        
-        embed = discord.Embed(
-            title="📊 تقرير أكواد الهدايا",
-            color=0x2ecc71
-        )
-        
-        embed.add_field(
-            name="📦 إجمالي الأكواد",
-            value=str(total_codes['count'] if total_codes else 0),
-            inline=True
-        )
-        embed.add_field(
-            name="✅ الأكواد المستخدمة",
-            value=str(used_codes['count'] if used_codes else 0),
-            inline=True
-        )
-        embed.add_field(
-            name="⏳ الأكواد المعلقة",
-            value=str(pending_codes['count'] if pending_codes else 0),
-            inline=True
-        )
-        embed.add_field(
-            name="🎁 إجمالي الاستردادات",
-            value=str(total_redemptions['count'] if total_redemptions else 0),
-            inline=True
-        )
-        
-        # Get recent redemptions
-        recent = await db.fetchall("""
-            SELECT gr.*, gc.code 
-            FROM gift_redemptions gr
-            JOIN gift_codes gc ON gr.code_id = gc.id
-            ORDER BY gr.redeemed_at DESC
-            LIMIT 5
-        """)
-        
-        if recent:
-            recent_list = [dict(r) for r in recent]
-            recent_text = "\n".join([
-                f"• `{r['code'][:15]}` - {r.get('redeemed_at', '—')[:10]}"
-                for r in recent_list
-            ])
-            embed.add_field(name="🔄 آخر الاستردادات", value=recent_text, inline=False)
-        
-        embed.set_footer(text="WOS-M • Gift Codes Report")
-        
-        await interaction.edit_original_response(embed=embed)
-        
-        await audit_log.log(
-            user_id=str(interaction.user.id),
-            user_name=str(interaction.user),
-            action="view_gift_report",
-            category=AuditCategory.GIFT_CODES
-        )
-        
-    except Exception:
-        import logging
-        logging.exception("gift_report failed")
-        await interaction.edit_original_response(
-            content="❌ حدث خطأ أثناء تحميل التقرير"
-        )
-
-
-async def single_redeem_modal_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Callback for single_redeem_modal - Handle modal submission."""
-    # This is handled by the modal's on_submit directly
-    await interaction.response.send_message(
-        "⏳ جاري معالجة طلبك...",
-        ephemeral=True
-    )
-
-
-async def enable_auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Enable auto redeem for an alliance."""
-    from core.permissions import PermissionGuard, PermissionLevel
-    guard = PermissionGuard(bot)
-    
-    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
-        await interaction.response.send_message("ليس لديك صلاحية.", ephemeral=True)
-        return
-    
-    # Get alliance_id from interaction data or use first alliance
-    alliance_id = None
-    if interaction.data and "values" in interaction.data:
-        alliance_id = int(interaction.data["values"][0])
-    
-    if alliance_id:
-        from core.database import db
-        await db.execute(
-            "UPDATE alliances SET auto_gift_enabled = 1 WHERE id = ?",
-            (alliance_id,)
-        )
-        await db.connection.commit()
-        
-        embed = discord.Embed(
-            title="✅ تم تفعيل الاسترداد التلقائي",
-            color=0x2ecc71
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-    else:
-        await interaction.response.send_message("❌ لم يتم تحديد الأونلاين.", ephemeral=True)
-
-
-async def disable_auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Disable auto redeem for an alliance."""
-    from core.permissions import PermissionGuard, PermissionLevel
-    guard = PermissionGuard(bot)
-    
-    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
-        await interaction.response.send_message("ليس لديك صلاحية.", ephemeral=True)
-        return
-    
-    # Get alliance_id from interaction data or use first alliance
-    alliance_id = None
-    if interaction.data and "values" in interaction.data:
-        alliance_id = int(interaction.data["values"][0])
-    
-    if alliance_id:
-        from core.database import db
-        await db.execute(
-            "UPDATE alliances SET auto_gift_enabled = 0 WHERE id = ?",
-            (alliance_id,)
-        )
-        await db.connection.commit()
-        
-        embed = discord.Embed(
-            title="❌ تم إيقاف الاسترداد التلقائي",
-            color=0xe74c3c
-        )
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-    else:
-        await interaction.response.send_message("❌ لم يتم تحديد الأونلاين.", ephemeral=True)
-
-
-async def redeem_all_alliances_callback(bot: WOSMBot, interaction: discord.Interaction):
-    """Redeem codes for all alliances."""
-    from core.permissions import PermissionGuard, PermissionLevel
-    from modules.gift_codes.redemption_engine import RedemptionEngine
-    from core.database import db
-    
-    guard = PermissionGuard(bot)
-    
-    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
-        await interaction.response.send_message("ليس لديك صلاحية.", ephemeral=True)
-        return
-    
-    await interaction.response.send_message("⏳ جاري استرداد أكواد كل الأونلاينات...", ephemeral=True)
-    
-    engine = RedemptionEngine()
-    result = await engine.auto_redeem_all_alliances()
+    new_state = not current
+    status = "✅ مفعّل" if new_state else "❌ معطّل"
     
     embed = discord.Embed(
-        title="📊 نتيجة الاسترداد الجماعي",
-        description=f"تم معالجة {result.get('total', 0)} كود",
+        title="⚙️ إعدادات الاسترداد التلقائي",
+        description=f"الاسترداد التلقائي: {status}",
+        color=0x00ff00 if new_state else 0xff0000
+    )
+    
+    view = BaseView(user_id=interaction.user.id)
+    view.add_back_home_buttons()
+    
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
+async def alliance_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Alliance online players redemption callback."""
+    guard = PermissionGuard(bot)
+
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
+        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
+        return
+
+    from integrations.gift_codes import GiftCodeService
+    service = GiftCodeService(bot, db.conn)
+    
+    online_players = await db.fetchall(
+        "SELECT player_id, name FROM players WHERE status = 'online' LIMIT 50"
+    )
+
+    if not online_players:
+        await interaction.response.send_message(
+            "❌ لا يوجد لاعبون متصلون",
+            ephemeral=True
+        )
+        return
+
+    player_ids = [str(p['player_id']) for p in online_players]
+    codes = service.get_codes(status='active', limit=5)
+    
+    if not codes:
+        await interaction.response.send_message(
+            "❌ لا توجد أكواد نشطة",
+            ephemeral=True
+        )
+        return
+
+    await interaction.response.send_message(
+        f"⏳ جاري استرداد الأكواد لـ {len(online_players)} لاعب متصل...",
+        ephemeral=True
+    )
+    
+    results = {"success": 0, "failed": 0}
+    for code_data in codes:
+        code = code_data['code']
+        result = await service.batch_redeem(code, player_ids)
+        results["success"] += result.get("success", 0)
+        results["failed"] += result.get("failed", 0)
+
+    embed = discord.Embed(
+        title="📊 تقرير الاسترداد للأونلاين",
+        description=f"**النجاح:** {results['success']}\n"
+                   f"**الفشل:** {results['failed']}",
         color=0x3498db
     )
-    embed.add_field(name="✅ نجح", value=str(result.get('success', 0)), inline=True)
-    embed.add_field(name="❌ فشل", value=str(result.get('failed', 0)), inline=True)
-    
+
     await interaction.edit_original_response(embed=embed)
