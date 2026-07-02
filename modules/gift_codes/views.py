@@ -138,8 +138,7 @@ async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Main gift codes callback - shows gift codes dashboard."""
     from discord import ButtonStyle
     from views.buttons import DashboardButton
-    from modules.dashboard.views import DashboardView
-    from config.settings import settings
+        from config.settings import settings
     
     embed = discord.Embed(
         title="🎁 إدارة أكواد الهدايا",
@@ -153,7 +152,7 @@ async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     embed.add_field(name="⚙️ تلقائي", value="إدارة الاسترداد التلقائي", inline=False)
     embed.add_field(name="📊 التقرير", value="عرض تقرير الأكواد", inline=False)
     
-    view = DashboardView(bot=bot, user_id=interaction.user.id)
+    view = BaseView(user_id=interaction.user.id, timeout=300)
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="➕ إضافة كود",
