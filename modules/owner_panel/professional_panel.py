@@ -729,10 +729,10 @@ class OwnerMaintenanceView(BaseView):
         super().__init__(user_id=user_id, timeout=600)
         
         self.add_item(ui.Button(
-            label=f"{'🔓' if await SettingsManager.get('maintenance_mode', False) else '🔒'} {'إلغاء' if await SettingsManager.get('maintenance_mode', False) else 'تفعيل'} الصيانة",
+            label="تفعيل/إلغاء الصيانة",
             custom_id="prof_toggle_maintenance",
             style=ButtonStyle.danger,
-            emoji="🔒" if not await SettingsManager.get('maintenance_mode', False) else "🔓",
+            emoji="🔒",
             row=0
         ))
         self.add_item(ui.Button(
