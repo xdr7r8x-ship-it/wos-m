@@ -355,10 +355,8 @@ async def owner_panel_callback(bot: WOSMBot, interaction: discord.Interaction):
         )
         return
     
-    view = OwnerPanelView(bot, interaction.user.id)
-    embed = view.create_embed()
-    
-    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+    from modules.owner_panel.professional_panel import owner_main_callback
+    await owner_main_callback(bot, interaction)
     
     await audit_log.log(
         user_id=str(interaction.user.id),
