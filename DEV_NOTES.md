@@ -201,3 +201,11 @@ mypy core modules
 # Security scan
 python scripts/security_scan.py
 ```
+
+## 2026-07-02 - Final Runtime Tree Audit
+- Fixed all sqlite3.Row .get() defects
+- Fixed schema mismatch in gift_codes/logic.py
+- Added get_queue_size() to process_queue.py
+- Fixed gift_codes SQL queries
+- Changed maintenance to use bot.process_queue
+- Commit: c01295d
