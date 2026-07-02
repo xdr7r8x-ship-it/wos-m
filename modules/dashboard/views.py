@@ -16,21 +16,23 @@ from views.base import BaseView, PageInfo
 from views.buttons import DashboardButton
 from views.selects import LanguageSelect
 
+
 async def _get_user_role(bot: WOSMBot, interaction: discord.Interaction) -> str:
     """Get user role based on permissions."""
     guard = PermissionGuard(bot)
     user_id = str(interaction.user.id)
-    
+
     if await guard.is_owner(user_id):
         return "owner"
-    
+
     guild_id = str(interaction.guild_id) if interaction.guild_id else None
     level = await guard.get_user_level(user_id, guild_id=guild_id)
-    
+
     if level and level <= PermissionLevel.SERVER_ADMIN:
         return "admin"
-    
+
     return "member"
+
 
 class DashboardView(BaseView):
     """Main dashboard view."""
@@ -53,7 +55,7 @@ class DashboardView(BaseView):
     def _build_buttons(self):
         """Build dashboard buttons based on registry visibility."""
         from core.feature_registry import feature_registry
-        
+
         ordered_ids = [
             "dash_alliances",
             "dash_players",
@@ -70,7 +72,7 @@ class DashboardView(BaseView):
             "dash_language",
             "dash_settings",
         ]
-        
+
         row_map = {
             "dash_alliances": 0, "dash_players": 0, "dash_gift_codes": 0,
             "dash_events": 1, "dash_attendance": 1, "dash_bear_tracking": 1,
@@ -85,13 +87,13 @@ class DashboardView(BaseView):
                 continue
             if self.role not in spec.visible_to:
                 continue
-            
+
             feature_name = custom_id.replace("dash_", "")
             if feature_registry and not feature_registry.is_feature_enabled(feature_name):
                 continue
 
             row = row_map.get(custom_id, 0)
-            
+
             self.add_item(DashboardButton(
                 label=i18n.get(spec.label_key),
                 custom_id=spec.custom_id,
@@ -100,101 +102,23 @@ class DashboardView(BaseView):
                 row=row
             ))
 
-        # ═══════════════════════════════════════════════════════
-        # الأزرار الاحترافية للمالك
-        # ═══════════════════════════════════════════════════════
+        # Professional buttons for owner (row 4 - last row)
         if self.role == "owner":
-            # الصف 4 - أدوات احترافية
             self.add_item(DashboardButton(
-                label="📊 الإحصائيات",
-                custom_id="prof_stats",
-                style=discord.ButtonStyle.secondary,
-                emoji="📊",
-                row=4
-            ))
+                label="📊 إحصائيات", custom_id="prof_stats",
+                style=discord.ButtonStyle.secondary, emoji="📊", row=4))
             self.add_item(DashboardButton(
-                label="👥 المستخدمين",
-                custom_id="prof_users",
-                style=discord.ButtonStyle.secondary,
-                emoji="👥",
-                row=4
-            ))
+                label="👥 مستخدمين", custom_id="prof_users",
+                style=discord.ButtonStyle.secondary, emoji="👥", row=4))
             self.add_item(DashboardButton(
-                label="🔐 الصلاحيات",
-                custom_id="prof_permissions",
-                style=discord.ButtonStyle.secondary,
-                emoji="🔐",
-                row=4
-            ))
-
-            # الصف 5 - إعدادات متقدمة
+                label="🔐 صلاحيات", custom_id="prof_permissions",
+                style=discord.ButtonStyle.secondary, emoji="🔐", row=4))
             self.add_item(DashboardButton(
-                label="⚙️ الإعدادات",
-                custom_id="prof_settings",
-                style=discord.ButtonStyle.secondary,
-                emoji="⚙️",
-                row=5
-            ))
+                label="⚙️ إعدادات", custom_id="prof_settings",
+                style=discord.ButtonStyle.secondary, emoji="⚙️", row=4))
             self.add_item(DashboardButton(
-                label="🎨 المظهر",
-                custom_id="prof_appearance",
-                style=discord.ButtonStyle.secondary,
-                emoji="🎨",
-                row=5
-            ))
-            self.add_item(DashboardButton(
-                label="🔧 الصيانة",
-                custom_id="prof_maintenance",
-                style=discord.ButtonStyle.secondary,
-                emoji="🔧",
-                row=5
-            ))
-
-            # الصف 6 - إدارة متقدمة
-            self.add_item(DashboardButton(
-                label="🎁 الهدايا",
-                custom_id="prof_gifts",
-                style=discord.ButtonStyle.success,
-                emoji="🎁",
-                row=6
-            ))
-            self.add_item(DashboardButton(
-                label="📢 البث",
-                custom_id="prof_broadcast",
-                style=discord.ButtonStyle.success,
-                emoji="📢",
-                row=6
-            ))
-            self.add_item(DashboardButton(
-                label="🗄️ البيانات",
-                custom_id="prof_database",
-                style=discord.ButtonStyle.danger,
-                emoji="🗄️",
-                row=6
-            ))
-
-            # الصف 7 - سجلات وتحالفات
-            self.add_item(DashboardButton(
-                label="📜 السجلات",
-                custom_id="prof_logs",
-                style=discord.ButtonStyle.secondary,
-                emoji="📜",
-                row=7
-            ))
-            self.add_item(DashboardButton(
-                label="🏰 التحالفات",
-                custom_id="prof_alliances",
-                style=discord.ButtonStyle.secondary,
-                emoji="🏰",
-                row=7
-            ))
-            self.add_item(DashboardButton(
-                label="🔄 تحديث",
-                custom_id="prof_refresh",
-                style=discord.ButtonStyle.secondary,
-                emoji="🔄",
-                row=7
-            ))
+                label="🎨 مظهر", custom_id="prof_appearance",
+                style=discord.ButtonStyle.secondary, emoji="🎨", row=4))
 
 
 class LanguageView(BaseView):
@@ -215,6 +139,7 @@ class LanguageView(BaseView):
         self.add_item(LanguageSelect(i18n.current_locale))
         self.add_back_home_buttons()
 
+
 async def dashboard_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for dashboard command."""
     role = await _get_user_role(bot, interaction)
@@ -224,6 +149,7 @@ async def dashboard_callback(bot: WOSMBot, interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
+
 async def language_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for language selection."""
     view = LanguageView(bot, interaction.user.id)
@@ -232,18 +158,22 @@ async def language_callback(bot: WOSMBot, interaction: discord.Interaction):
 
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
+
 # Navigation callbacks
 async def nav_back_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Navigate back."""
     await dashboard_callback(bot, interaction)
 
+
 async def nav_home_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Navigate home."""
     await dashboard_callback(bot, interaction)
 
+
 async def nav_refresh_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Refresh dashboard."""
     await dashboard_callback(bot, interaction)
+
 
 async def nav_close_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Close message."""
@@ -253,11 +183,12 @@ async def nav_close_callback(bot: WOSMBot, interaction: discord.Interaction):
         if not interaction.response.is_done():
             await interaction.response.send_message("تم إغلاق النافذة.", ephemeral=True)
 
+
 async def settings_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Settings callback."""
     from views.base import BaseView, PageInfo
     from views.buttons import ActionButton
-    
+
     class SettingsView(BaseView):
         def __init__(self, bot, user_id):
             self.bot = bot
@@ -272,11 +203,12 @@ async def settings_callback(bot: WOSMBot, interaction: discord.Interaction):
     embed = view.create_embed()
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
+
 async def settings_language_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Settings language callback."""
     from views.base import BaseView, PageInfo
     from views.selects import LanguageSelect
-    
+
     class LanguageSettingsView(BaseView):
         def __init__(self, bot, user_id):
             self.bot = bot
@@ -288,10 +220,11 @@ async def settings_language_callback(bot: WOSMBot, interaction: discord.Interact
             ))
             self.add_item(LanguageSelect(i18n.current_locale))
             self.add_back_home_buttons()
-    
+
     view = LanguageSettingsView(bot, interaction.user.id)
     embed = view.create_embed()
     await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
 
 async def settings_timezone_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Settings timezone callback."""
@@ -303,10 +236,7 @@ async def settings_timezone_callback(bot: WOSMBot, interaction: discord.Interact
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-# ═══════════════════════════════════════════════════════════════════════════════════
-# Professional Panel Callbacks - Delegation
-# ═══════════════════════════════════════════════════════════════════════════════════
-
+# Professional Panel Callbacks
 async def prof_main_callback(bot: WOSMBot, interaction: discord.Interaction):
     from modules.owner_panel.professional_panel import owner_main_callback
     await owner_main_callback(bot, interaction)
