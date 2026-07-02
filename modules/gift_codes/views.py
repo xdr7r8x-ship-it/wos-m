@@ -139,11 +139,12 @@ async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     from discord import ButtonStyle
     from views.buttons import DashboardButton
     from modules.dashboard.views import DashboardView
+    from config.settings import settings
     
     embed = discord.Embed(
         title="🎁 إدارة أكواد الهدايا",
         description="اختر الإجراء المطلوب:",
-        color=bot.theme_color_primary
+        color=settings.theme_color_primary
     )
     embed.add_field(name="➕ إضافة كود", value="إضافة كود هدية جديد", inline=False)
     embed.add_field(name="🎫 استرداد فردي", value="استرداد كود لعضو واحد", inline=False)
