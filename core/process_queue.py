@@ -6,7 +6,7 @@ import asyncio
 import json
 from datetime import datetime
 from enum import IntEnum
-from typing import Optional, Callable, Any, Dict
+from typing import Optional, Callable, Any, Dict, List
 import logging
 
 from core.database import db
@@ -210,6 +210,15 @@ class ProcessQueue:
         
         if rows and rows[0]["count"] > 0:
             logger.info(f"Recovered {rows[0]['count']} crashed tasks")
+    
+    async def get_recent_items(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent queue items."""
+        rows = await db.fetchall(
+            """SELECT id, task_type, status, created_at, updated_at
+               FROM process_queue ORDER BY created_at DESC LIMIT ?""",
+            (limit,)
+        )
+        return [dict(row) for row in rows]
     
     async def _process_loop(self):
         """Main queue processing loop."""

@@ -108,9 +108,11 @@ async def event_list_callback(bot: WOSMBot, interaction: discord.Interaction):
     )
     
     for row in rows[:10]:
+        event_time = row["event_time"] if "event_time" in row.keys() else ""
+        location = row["location"] if "location" in row.keys() else "N/A"
         embed.add_field(
             name=row["name"],
-            value=f"📅 {row['event_date']} {row.get('event_time', '')}\n📍 {row.get('location', 'N/A')}",
+            value=f"📅 {row['event_date']} {event_time}\n📍 {location}",
             inline=False
         )
     

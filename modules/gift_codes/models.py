@@ -37,11 +37,11 @@ class GiftCode:
         return cls(
             id=row["id"],
             code=row["code"],
-            alliance_id=row.get("alliance_id"),
+            alliance_id=row["alliance_id"] if "alliance_id" in row.keys() else None,
             status=GiftCodeStatus(row["status"]),
-            added_by=row.get("added_by"),
-            added_at=datetime.fromisoformat(row["added_at"]) if row.get("added_at") else datetime.now(),
-            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if row.get("redeemed_at") else None
+            added_by=row["added_by"] if "added_by" in row.keys() else None,
+            added_at=datetime.fromisoformat(row["added_at"]) if "added_at" in row.keys() and row["added_at"] else datetime.now(),
+            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if "redeemed_at" in row.keys() and row["redeemed_at"] else None
         )
 
 
@@ -63,8 +63,8 @@ class GiftRedemption:
             code_id=row["code_id"],
             player_id=row["player_id"],
             status=row["status"],
-            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if row.get("redeemed_at") else None,
-            error_message=row.get("error_message")
+            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if "redeemed_at" in row.keys() and row["redeemed_at"] else None,
+            error_message=row["error_message"] if "error_message" in row.keys() else None
         )
 
 
@@ -87,13 +87,13 @@ class GiftRedemptionBatch:
         return cls(
             id=row["id"],
             code=row["code"],
-            alliance_id=row.get("alliance_id"),
+            alliance_id=row["alliance_id"] if "alliance_id" in row.keys() else None,
             total_count=row["total_count"] or 0,
             success_count=row["success_count"] or 0,
             failure_count=row["failure_count"] or 0,
             status=row["status"],
-            started_at=datetime.fromisoformat(row["started_at"]) if row.get("started_at") else datetime.now(),
-            completed_at=datetime.fromisoformat(row["completed_at"]) if row.get("completed_at") else None
+            started_at=datetime.fromisoformat(row["started_at"]) if "started_at" in row.keys() and row["started_at"] else datetime.now(),
+            completed_at=datetime.fromisoformat(row["completed_at"]) if "completed_at" in row.keys() and row["completed_at"] else None
         )
 
 
@@ -115,10 +115,10 @@ class GiftRedemptionResult:
             id=row["id"],
             batch_id=row["batch_id"],
             player_id=row["player_id"],
-            player_name=row.get("player_name", ""),
+            player_name=row["player_name"] if "player_name" in row.keys() else "",
             status=row["status"],
-            error_message=row.get("error_message"),
-            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if row.get("redeemed_at") else None
+            error_message=row["error_message"] if "error_message" in row.keys() else None,
+            redeemed_at=datetime.fromisoformat(row["redeemed_at"]) if "redeemed_at" in row.keys() and row["redeemed_at"] else None
         )
 
 

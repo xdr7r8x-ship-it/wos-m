@@ -181,7 +181,8 @@ async def minister_list_callback(bot: WOSMBot, interaction: discord.Interaction)
         for m in ministers:
             player_name = m["player_name"] if "player_name" in m.keys() else "—"
             title = m["title"] if "title" in m.keys() else "—"
-            is_active = "🟢 نشط" if m.get("is_active", 0) == 1 else "🔴 غير نشط"
+            is_active_value = m["is_active"] if "is_active" in m.keys() else 0
+            is_active = "🟢 نشط" if int(is_active_value or 0) == 1 else "🔴 غير نشط"
             embed.add_field(
                 name=f"📌 {title}",
                 value=f"👤 {player_name} | {is_active}",
