@@ -582,8 +582,8 @@ class WOSMBot(discord.Client):
         await batch_redeem_callback(self, interaction)
     
     async def _handle_gift_redeem_alliance(self, interaction: discord.Interaction):
-        from modules.gift_codes.views import redeem_alliance_code_callback
-        await redeem_alliance_code_callback(self, interaction)
+        from modules.gift_codes.views import redeem_alliance_callback
+        await redeem_alliance_callback(self, interaction)
     
     async def _handle_gift_auto(self, interaction: discord.Interaction):
         from modules.gift_codes.views import auto_redeem_callback
@@ -605,6 +605,44 @@ class WOSMBot(discord.Client):
     async def _handle_auto_redeem_all(self, interaction: discord.Interaction):
         from modules.gift_codes.views import redeem_all_alliances_callback
         await redeem_all_alliances_callback(self, interaction)
+    
+    # Modal handlers for gift_codes
+    async def _handle_add_gift_modal(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import add_gift_code_callback
+        await add_gift_code_callback(self, interaction)
+    
+    async def _handle_batch_redeem_modal(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import batch_redeem_callback
+        await batch_redeem_callback(self, interaction)
+    
+    async def _handle_redeem_gift_modal(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import redeem_single_code_callback
+        await redeem_single_code_callback(self, interaction)
+    
+    async def _handle_single_redeem_modal(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import single_redeem_modal_callback
+        await single_redeem_modal_callback(self, interaction)
+    
+    # Additional gift_codes handlers
+    async def _handle_batch_manual(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import batch_redeem_callback
+        await batch_redeem_callback(self, interaction)
+    
+    async def _handle_batch_redeem_all(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import redeem_all_alliances_callback
+        await redeem_all_alliances_callback(self, interaction)
+    
+    async def _handle_gift_alliance(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import redeem_alliance_callback
+        await redeem_alliance_callback(self, interaction)
+    
+    async def _handle_gift_redeem(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import redeem_single_code_callback
+        await redeem_single_code_callback(self, interaction)
+    
+    async def _handle_gift_settings(self, interaction: discord.Interaction):
+        from modules.gift_codes.views import gift_codes_callback
+        await gift_codes_callback(self, interaction)
     
     # Owner panel handlers
     async def _handle_owner_language(self, interaction: discord.Interaction):

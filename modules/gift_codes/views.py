@@ -134,6 +134,64 @@ class AllianceRedeemModal(ui.Modal):
         self.add_item(self.code_input)
 
 
+async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Main gift codes callback - shows gift codes dashboard."""
+    from discord import ButtonStyle
+    from views.buttons import DashboardButton, DashboardView
+    
+    embed = discord.Embed(
+        title="🎁 إدارة أكواد الهدايا",
+        description="اختر الإجراء المطلوب:",
+        color=bot.theme_color_primary
+    )
+    embed.add_field(name="➕ إضافة كود", value="إضافة كود هدية جديد", inline=False)
+    embed.add_field(name="🎫 استرداد فردي", value="استرداد كود لعضو واحد", inline=False)
+    embed.add_field(name="📦 استرداد جماعي", value="استرداد أكواد متعددة", inline=False)
+    embed.add_field(name="🏰 استرداد للألوان", value="استرداد أكواد للأونلاين", inline=False)
+    embed.add_field(name="⚙️ تلقائي", value="إدارة الاسترداد التلقائي", inline=False)
+    embed.add_field(name="📊 التقرير", value="عرض تقرير الأكواد", inline=False)
+    
+    view = DashboardView(timeout=300)
+    view.add_item(DashboardButton(
+        style=ButtonStyle.primary,
+        label="➕ إضافة كود",
+        custom_id="gift_add",
+        emoji="➕"
+    ))
+    view.add_item(DashboardButton(
+        style=ButtonStyle.primary,
+        label="🎫 استرداد فردي",
+        custom_id="gift_redeem_single",
+        emoji="🎫"
+    ))
+    view.add_item(DashboardButton(
+        style=ButtonStyle.primary,
+        label="📦 استرداد جماعي",
+        custom_id="gift_batch",
+        emoji="📦"
+    ))
+    view.add_item(DashboardButton(
+        style=ButtonStyle.secondary,
+        label="🏰 للأونلاين",
+        custom_id="gift_redeem_alliance",
+        emoji="🏰"
+    ))
+    view.add_item(DashboardButton(
+        style=ButtonStyle.secondary,
+        label="⚙️ تلقائي",
+        custom_id="gift_auto",
+        emoji="⚙️"
+    ))
+    view.add_item(DashboardButton(
+        style=ButtonStyle.secondary,
+        label="📊 التقرير",
+        custom_id="gift_report",
+        emoji="📊"
+    ))
+    
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+
 async def add_gift_code_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Add gift code callback - Open modal to add a new gift code."""
     guard = PermissionGuard(bot)
@@ -561,3 +619,93 @@ async def single_redeem_modal_callback(bot: WOSMBot, interaction: discord.Intera
         "⏳ جاري معالجة طلبك...",
         ephemeral=True
     )
+
+
+async def enable_auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Enable auto redeem for an alliance."""
+    from core.permissions import PermissionGuard, PermissionLevel
+    guard = PermissionGuard(bot)
+    
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
+        await interaction.response.send_message("ليس لديك صلاحية.", ephemeral=True)
+        return
+    
+    # Get alliance_id from interaction data or use first alliance
+    alliance_id = None
+    if interaction.data and "values" in interaction.data:
+        alliance_id = int(interaction.data["values"][0])
+    
+    if alliance_id:
+        from core.database import db
+        await db.execute(
+            "UPDATE alliances SET auto_gift_enabled = 1 WHERE id = ?",
+            (alliance_id,)
+        )
+        await db.connection.commit()
+        
+        embed = discord.Embed(
+            title="✅ تم تفعيل الاسترداد التلقائي",
+            color=0x2ecc71
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    else:
+        await interaction.response.send_message("❌ لم يتم تحديد الأونلاين.", ephemeral=True)
+
+
+async def disable_auto_redeem_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Disable auto redeem for an alliance."""
+    from core.permissions import PermissionGuard, PermissionLevel
+    guard = PermissionGuard(bot)
+    
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
+        await interaction.response.send_message("ليس لديك صلاحية.", ephemeral=True)
+        return
+    
+    # Get alliance_id from interaction data or use first alliance
+    alliance_id = None
+    if interaction.data and "values" in interaction.data:
+        alliance_id = int(interaction.data["values"][0])
+    
+    if alliance_id:
+        from core.database import db
+        await db.execute(
+            "UPDATE alliances SET auto_gift_enabled = 0 WHERE id = ?",
+            (alliance_id,)
+        )
+        await db.connection.commit()
+        
+        embed = discord.Embed(
+            title="❌ تم إيقاف الاسترداد التلقائي",
+            color=0xe74c3c
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    else:
+        await interaction.response.send_message("❌ لم يتم تحديد الأونلاين.", ephemeral=True)
+
+
+async def redeem_all_alliances_callback(bot: WOSMBot, interaction: discord.Interaction):
+    """Redeem codes for all alliances."""
+    from core.permissions import PermissionGuard, PermissionLevel
+    from modules.gift_codes.redemption_engine import RedemptionEngine
+    from core.database import db
+    
+    guard = PermissionGuard(bot)
+    
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.GLOBAL_ADMIN):
+        await interaction.response.send_message("ليس لديك صلاحية.", ephemeral=True)
+        return
+    
+    await interaction.response.send_message("⏳ جاري استرداد أكواد كل الأونلاينات...", ephemeral=True)
+    
+    engine = RedemptionEngine()
+    result = await engine.auto_redeem_all_alliances()
+    
+    embed = discord.Embed(
+        title="📊 نتيجة الاسترداد الجماعي",
+        description=f"تم معالجة {result.get('total', 0)} كود",
+        color=0x3498db
+    )
+    embed.add_field(name="✅ نجح", value=str(result.get('success', 0)), inline=True)
+    embed.add_field(name="❌ فشل", value=str(result.get('failed', 0)), inline=True)
+    
+    await interaction.edit_original_response(embed=embed)
