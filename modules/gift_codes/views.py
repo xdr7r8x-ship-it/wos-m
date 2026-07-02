@@ -271,7 +271,7 @@ async def redeem_single_code_callback(bot: WOSMBot, interaction: discord.Interac
                 
                 if result.get("success"):
                     await interaction.response.send_message(
-                        f"✅ تم استرداد الكود `{code}` بنجاح للاعب {player.get('name', player_fid)}!",
+                        f"✅ تم استرداد الكود `{code}` بنجاح للاعب {player['name'] if 'name' in player.keys() else player_fid}!",
                         ephemeral=True
                     )
                 else:
@@ -488,7 +488,7 @@ async def gift_report_callback(bot: WOSMBot, interaction: discord.Interaction):
     try:
         # Get statistics
         total_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes")
-        used_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = GiftCodeStatus.REDEEMED.value")
+        used_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = 'redeemed'")
         pending_codes = await db.fetchone("SELECT COUNT(*) as count FROM gift_codes WHERE status = 'pending'")
         total_redemptions = await db.fetchone("SELECT COUNT(*) as count FROM gift_redemptions")
         

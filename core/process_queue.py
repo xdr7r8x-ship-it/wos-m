@@ -192,6 +192,16 @@ class ProcessQueue:
         
         return stats
     
+    async def get_queue_size(self) -> Dict[str, int]:
+        """Get queue size summary."""
+        stats = await self.get_queue_stats()
+        return {
+            "pending": stats.get(QueueStatus.QUEUED, 0),
+            "processing": stats.get(QueueStatus.ACTIVE, 0),
+            "completed": stats.get(QueueStatus.COMPLETED, 0),
+            "failed": stats.get(QueueStatus.FAILED, 0) + stats.get(QueueStatus.RETRY, 0),
+        }
+
     async def recover_crashed_tasks(self):
         """Recover tasks that were marked as active for too long."""
         await db.execute(

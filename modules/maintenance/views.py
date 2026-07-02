@@ -664,7 +664,7 @@ async def maint_queue_callback(bot: WOSMBot, interaction: discord.Interaction):
     await interaction.response.send_message("📬 جاري تحميل حالة الطابور...", ephemeral=True)
     
     try:
-        from core.process_queue import process_queue
+        process_queue = bot.process_queue
         
         # Get queue status
         queue_size = await process_queue.get_queue_size()
@@ -687,7 +687,7 @@ async def maint_queue_callback(bot: WOSMBot, interaction: discord.Interaction):
         recent = await process_queue.get_recent_items(limit=5)
         if recent:
             recent_text = "\n".join([
-                f"• `{item.get('id', '—')[:20]}` - {item.get('status', '—')}"
+                f"• `{item['id'] if 'id' in item else '—'}` - {item['status'] if 'status' in item else '—'}"
                 for item in recent
             ])
             embed.add_field(name="📋 العناصر الأخيرة", value=recent_text, inline=False)

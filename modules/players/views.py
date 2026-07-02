@@ -415,7 +415,9 @@ async def player_export_callback(bot: WOSMBot, interaction: discord.Interaction)
         writer.writerow(["FID", "Name", "Level", "Alliance"])
         
         for row in rows:
-            writer.writerow([row["fid"], row["name"], row.get("level", ""), row.get("alliance_name", "")])
+            level = row["level"] if "level" in row.keys() else ""
+            alliance = row["alliance_name"] if "alliance_name" in row.keys() else ""
+            writer.writerow([row["fid"], row["name"], level, alliance])
         
         csv_content = output.getvalue()
         output.close()
@@ -426,8 +428,8 @@ async def player_export_callback(bot: WOSMBot, interaction: discord.Interaction)
             players.append({
                 "fid": row["fid"],
                 "name": row["name"],
-                "level": row.get("level"),
-                "alliance": row.get("alliance_name")
+                "level": row["level"] if "level" in row.keys() else None,
+                "alliance": row["alliance_name"] if "alliance_name" in row.keys() else None
             })
         
         json_content = json.dumps(players, indent=2, ensure_ascii=False)

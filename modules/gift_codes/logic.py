@@ -38,11 +38,17 @@ async def redeem_gift_code(
     if not alliance:
         return False, "التحالف غير موجود"
     
-    # Get player_id from alliance
-    player_id = alliance["owner_player_id"] or alliance["player_id"]
+    # Get player_id from alliance - use players table
+    player = await db.fetchone(
+        "SELECT id, fid FROM players WHERE alliance_id = ? AND is_active = 1 LIMIT 1",
+        (alliance_id,)
+    )
     
-    if not player_id:
-        return False, "لا يمكن تحديد مالك التحالف"
+    if not player:
+        return False, "لا يوجد لاعبين مرتبطين بهذا التحالف"
+    
+    player_id = player["id"]
+    player_fid = player["fid"]
     
     # Redeem via redemption engine
     result = await redemption_engine.redeem_code(
@@ -138,11 +144,17 @@ async def get_alliance_gift_history(
     if not alliance:
         return []
     
-    player_id = alliance["owner_player_id"] or alliance["player_id"]
-    
-    if not player_id:
+    # Get player from players table
+    player = await db.fetchone(
+        "SELECT id, fid FROM players WHERE alliance_id = ? AND is_active = 1 LIMIT 1",
+        (alliance_id,)
+    )
+
+    if not player:
         return []
-    
+
+    player_id = player["id"]
+
     # Get redemptions
     redemptions = await db.fetchall("""
         SELECT gr.*, gc.code, gc.code_type, gc.value, gc.created_at as code_created
