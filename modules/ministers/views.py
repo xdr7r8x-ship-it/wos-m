@@ -94,20 +94,148 @@ async def ministers_callback(bot: WOSMBot, interaction: discord.Interaction):
 
 async def minister_add_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for minister_add."""
-    await interaction.response.send_message("تم استلام الطلب.", ephemeral=True)
+    from views.base import BaseView, PageInfo
+    
+    guard = PermissionGuard(bot)
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ALLIANCE_ADMIN):
+        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
+        return
+    
+    class AddMinisterView(BaseView):
+        def __init__(self, bot, user_id):
+            self.bot = bot
+            super().__init__(user_id=user_id, page_info=PageInfo(
+                title="👔 إضافة وزير جديد",
+                description="أضف منصب وزير جديد في التحالف",
+                icon="👔",
+                color=0x9b59b6
+            ))
+            self.add_back_home_buttons()
+    
+    view = AddMinisterView(bot, interaction.user.id)
+    embed = view.create_embed()
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
 
 async def minister_assign_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for minister_assign."""
-    await interaction.response.send_message("تم استلام الطلب.", ephemeral=True)
+    from core.database import db
+    from views.selects import PlayerSelect
+    
+    guard = PermissionGuard(bot)
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ALLIANCE_ADMIN):
+        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
+        return
+    
+    await interaction.response.send_message("⏳ جاري تحميل قائمة اللاعبين...", ephemeral=True, delete_after=2)
+    
+    # Get active ministers
+    ministers = await db.fetchall(
+        "SELECT m.*, p.name as player_name FROM ministers m "
+        "LEFT JOIN players p ON m.player_id = p.id "
+        "WHERE m.is_active = 1 ORDER BY m.created_at DESC"
+    )
+    
+    embed = discord.Embed(
+        title="👔 تعيين وزير",
+        description="قائمة المناصب المتاحة:",
+        color=0x9b59b6
+    )
+    
+    if ministers:
+        for m in ministers:
+            player_name = m["player_name"] if "player_name" in m.keys() else "—"
+            title = m["title"] if "title" in m.keys() else "—"
+            embed.add_field(
+                name=f"📌 {title}",
+                value=f"👤 اللاعب: {player_name}",
+                inline=True
+            )
+    else:
+        embed.description = "لا توجد مناصب ministers"
+    
+    await interaction.edit_original_response(embed=embed, view=None)
+
 
 async def minister_list_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for minister_list."""
-    await interaction.response.send_message("تم استلام الطلب.", ephemeral=True)
+    from core.database import db
+    
+    await interaction.response.send_message("⏳ جاري تحميل القائمة...", ephemeral=True, delete_after=1)
+    
+    ministers = await db.fetchall(
+        "SELECT m.*, p.name as player_name FROM ministers m "
+        "LEFT JOIN players p ON m.player_id = p.id "
+        "ORDER BY m.created_at DESC LIMIT 30"
+    )
+    
+    embed = discord.Embed(
+        title="👔 قائمة الوزراء",
+        description=f"إجمالي {len(ministers)} وزير:",
+        color=0x3498db
+    )
+    
+    if not ministers:
+        embed.description = "لا توجد مناصب ministers"
+    else:
+        for m in ministers:
+            player_name = m["player_name"] if "player_name" in m.keys() else "—"
+            title = m["title"] if "title" in m.keys() else "—"
+            is_active = "🟢 نشط" if m.get("is_active", 0) == 1 else "🔴 غير نشط"
+            embed.add_field(
+                name=f"📌 {title}",
+                value=f"👤 {player_name} | {is_active}",
+                inline=False
+            )
+    
+    await interaction.edit_original_response(embed=embed)
+
 
 async def minister_schedule_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for minister_schedule."""
-    await interaction.response.send_message("تم استلام الطلب.", ephemeral=True)
+    from views.base import BaseView, PageInfo
+    
+    guard = PermissionGuard(bot)
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ALLIANCE_ADMIN):
+        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
+        return
+    
+    class ScheduleView(BaseView):
+        def __init__(self, bot, user_id):
+            self.bot = bot
+            super().__init__(user_id=user_id, page_info=PageInfo(
+                title="📅 جدول الوزراء",
+                description="إدارة جدول عمل الوزراء",
+                icon="📅",
+                color=0xe67e22
+            ))
+            self.add_back_home_buttons()
+    
+    view = ScheduleView(bot, interaction.user.id)
+    embed = view.create_embed()
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
 
 async def minister_reminder_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Callback for minister_reminder."""
-    await interaction.response.send_message("تم استلام الطلب.", ephemeral=True)
+    from views.base import BaseView, PageInfo
+    
+    guard = PermissionGuard(bot)
+    if not await guard.has_permission(str(interaction.user.id), PermissionLevel.ALLIANCE_ADMIN):
+        await interaction.response.send_message(i18n.get("messages.no_permission"), ephemeral=True)
+        return
+    
+    class ReminderView(BaseView):
+        def __init__(self, bot, user_id):
+            self.bot = bot
+            super().__init__(user_id=user_id, page_info=PageInfo(
+                title="🔔 تذكيرات الوزراء",
+                description="إدارة تذكيرات عمل الوزراء",
+                icon="🔔",
+                color=0xf39c12
+            ))
+            self.add_back_home_buttons()
+    
+    view = ReminderView(bot, interaction.user.id)
+    embed = view.create_embed()
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
