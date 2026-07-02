@@ -97,7 +97,27 @@ def resolve_registered_handler(bot, spec):
 
 # Custom IDs that are handled locally by views (PaginationView, etc)
 # These should NOT be dispatched globally - they're handled by the View's own callbacks
-LOCAL_VIEW_CALLBACKS = {"nav_prev", "nav_next"}
+LOCAL_VIEW_CALLBACKS = {
+    "nav_prev", "nav_next",
+    # Select menus handled by their own view callbacks
+    "owner_panel_section_select",
+    "language_select",
+    "alliance_select",
+    "alliance_select_enable",
+    "alliance_select_disable",
+    "player_select",
+    "event_select",
+    "event_type_select",
+    "notif_select",
+    "notification_type_select",
+    "permission_role_select",
+    "gift_code_status_select",
+    "attendance_status_select",
+    "timezone_select",
+    "page_select",
+    "settings_select",
+    "feature_select",
+}
 
 # Track dispatched interactions to prevent double execution
 # Use a set instead of setting attributes on frozen Interaction objects
