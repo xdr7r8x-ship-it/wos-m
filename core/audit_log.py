@@ -25,6 +25,7 @@ class AuditCategory:
     THEMES = "themes"
     MAINTENANCE = "maintenance"
     OWNER_PANEL = "owner_panel"
+    BUTTON_MANAGEMENT = "owner_panel"
     SETTINGS = "settings"
     SYSTEM = "system"
 
@@ -42,7 +43,7 @@ class AuditLog:
         ip_address: Optional[str] = None
     ) -> int:
         """Log an audit event."""
-        details_json = json.dumps(details) if details else None
+        details_json = json.dumps(details, ensure_ascii=False) if details else None
 
         cursor = await db.execute(
             "INSERT INTO audit_logs (user_id, user_name, action, category, details, ip_address) VALUES (?, ?, ?, ?, ?, ?)",
@@ -94,6 +95,11 @@ class AuditLog:
             "SELECT * FROM audit_logs WHERE category = ? ORDER BY timestamp DESC LIMIT ? OFFSET ?",
             (category, limit, offset)
         )
+
+    @staticmethod
+    async def get_logs_by_category(category: str, limit: int = 50, offset: int = 0) -> list:
+        """Backward-compatible alias used by owner-panel callbacks."""
+        return await AuditLog.get_category_logs(category, limit=limit, offset=offset)
 
     @staticmethod
     async def clear_old_logs(days: int = 90) -> int:
