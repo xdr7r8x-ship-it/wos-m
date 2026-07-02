@@ -16,6 +16,7 @@ dotenv.load_dotenv()
 from config.settings import settings
 from core.bot import WOSMBot
 
+
 def setup_logging():
     log_dir = Path(__file__).parent / "data" / "logs"
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -33,8 +34,45 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
+
+def install_runtime_compatibility_patches():
+    """Install startup compatibility fixes before discord.py calls setup_hook."""
+    from core.database import Database
+
+    if getattr(Database, "_wosm_runtime_patches_installed", False):
+        return
+
+    original_create_tables = Database._create_tables
+
+    async def patched_create_tables(self):
+        await original_create_tables(self)
+        await self._db.executescript("""
+            CREATE TABLE IF NOT EXISTS button_configs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                custom_id TEXT UNIQUE NOT NULL,
+                label TEXT NOT NULL,
+                emoji TEXT,
+                enabled BOOLEAN DEFAULT 1,
+                created_by TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_button_configs_custom_id
+            ON button_configs(custom_id);
+        """)
+        await self._db.commit()
+
+    Database._create_tables = patched_create_tables
+    Database._wosm_runtime_patches_installed = True
+
+
 async def run_bot():
+    install_runtime_compatibility_patches()
     bot = WOSMBot()
+    # discord.py already calls setup_hook before the gateway is ready.
+    # The flag prevents the legacy on_ready fallback from running setup_hook twice.
+    bot._setup_complete = True
     token = os.getenv("DISCORD_BOT_TOKEN") or settings.bot.token
     
     if not token:
@@ -73,6 +111,19 @@ def check_system():
             print("PASS: state_kid in schema")
         else:
             issues.append("state_kid not found in schema")
+
+    # Check runtime compatibility patches
+    main_file = Path(__file__)
+    with open(main_file) as f:
+        main_content = f.read()
+    if "button_configs" in main_content:
+        print("PASS: button_configs compatibility patch")
+    else:
+        issues.append("button_configs compatibility patch missing")
+    if "bot._setup_complete = True" in main_content:
+        print("PASS: duplicate setup_hook guard")
+    else:
+        issues.append("duplicate setup_hook guard missing")
 
     # Check migrations
     migrations_file = Path(__file__).parent / "database" / "migrations" / "__init__.py"
