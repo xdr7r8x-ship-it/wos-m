@@ -75,7 +75,7 @@ class PermissionGuard:
     async def has_permission(
         self,
         user_id: str,
-        required_level: PermissionLevel,
+        required_level: PermissionLevel = PermissionLevel.OWNER,
         guild_id: Optional[str] = None,
         alliance_id: Optional[int] = None
     ) -> bool:
@@ -84,13 +84,17 @@ class PermissionGuard:
         
         Args:
             user_id: Discord user ID
-            required_level: Required permission level
+            required_level: Required permission level. Missing level defaults to OWNER
+                so legacy calls fail closed instead of granting broad access.
             guild_id: Optional guild ID
             alliance_id: Optional alliance ID
             
         Returns:
             True if user has permission, False otherwise
         """
+        if not isinstance(required_level, PermissionLevel):
+            raise TypeError("required_level must be a PermissionLevel")
+
         # Owner always has permission
         if await self.is_owner(user_id):
             return True
