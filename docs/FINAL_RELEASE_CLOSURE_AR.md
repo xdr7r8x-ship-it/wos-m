@@ -47,9 +47,9 @@
 ✅ PASS - 96 source files compiled successfully
 ```
 
-### pytest (272 tests)
+### pytest (267 tests)
 ```
-✅ PASS - 272 passed in 6.61s
+✅ PASS - 267 passed in 6.61s
 ```
 
 ### flake8 (full project)
@@ -158,7 +158,7 @@ Handled callbacks:
 | P2 Missing handlers | ✅ CLOSED |
 | P3 Docker HEALTHCHECK | ✅ CLOSED |
 | compileall | ✅ PASS |
-| pytest | ✅ PASS (272/272) |
+| pytest | ✅ PASS (267/267) |
 | flake8 | ✅ PASS |
 | mypy | ✅ PASS |
 | main.py --check | ✅ PASS |
