@@ -391,7 +391,7 @@ async def maint_database_callback(bot: WOSMBot, interaction: discord.Interaction
         for table in tables:
             try:
                 result = await db.fetchone(f"SELECT COUNT(*) as count FROM {table}")
-                count = result.get("count", 0) if result else 0
+                count = result["count"] if result and "count" in result.keys() else 0
                 results[f"table_{table}"] = f"✅ {count:,} سجل"
             except:
                 results[f"table_{table}"] = f"⚠️ غير موجود"
@@ -400,7 +400,7 @@ async def maint_database_callback(bot: WOSMBot, interaction: discord.Interaction
         try:
             result = await db.fetchone("SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()")
             if result:
-                size_bytes = result.get("size", 0)
+                size_bytes = result["size"] if result and "size" in result.keys() else 0
                 size_mb = size_bytes / (1024 * 1024)
                 results["database_size"] = f"📊 {size_mb:.2f} MB"
         except:
@@ -668,10 +668,10 @@ async def maint_queue_callback(bot: WOSMBot, interaction: discord.Interaction):
         
         # Get queue status
         queue_size = await process_queue.get_queue_size()
-        pending = queue_size.get("pending", 0)
-        processing = queue_size.get("processing", 0)
-        completed = queue_size.get("completed", 0)
-        failed = queue_size.get("failed", 0)
+        pending = queue_size["pending"] if "pending" in queue_size else 0
+        processing = queue_size["processing"] if "processing" in queue_size else 0
+        completed = queue_size["completed"] if "completed" in queue_size else 0
+        failed = queue_size["failed"] if "failed" in queue_size else 0
         
         embed = discord.Embed(
             title="📬 حالة طابور العمليات",
