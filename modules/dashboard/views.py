@@ -100,6 +100,103 @@ class DashboardView(BaseView):
                 row=row
             ))
 
+        # ═══════════════════════════════════════════════════════
+        # الأزرار الاحترافية للمالك
+        # ═══════════════════════════════════════════════════════
+        if self.role == "owner":
+            # الصف 4 - أدوات احترافية
+            self.add_item(DashboardButton(
+                label="📊 الإحصائيات",
+                custom_id="prof_stats",
+                style=discord.ButtonStyle.secondary,
+                emoji="📊",
+                row=4
+            ))
+            self.add_item(DashboardButton(
+                label="👥 المستخدمين",
+                custom_id="prof_users",
+                style=discord.ButtonStyle.secondary,
+                emoji="👥",
+                row=4
+            ))
+            self.add_item(DashboardButton(
+                label="🔐 الصلاحيات",
+                custom_id="prof_permissions",
+                style=discord.ButtonStyle.secondary,
+                emoji="🔐",
+                row=4
+            ))
+
+            # الصف 5 - إعدادات متقدمة
+            self.add_item(DashboardButton(
+                label="⚙️ الإعدادات",
+                custom_id="prof_settings",
+                style=discord.ButtonStyle.secondary,
+                emoji="⚙️",
+                row=5
+            ))
+            self.add_item(DashboardButton(
+                label="🎨 المظهر",
+                custom_id="prof_appearance",
+                style=discord.ButtonStyle.secondary,
+                emoji="🎨",
+                row=5
+            ))
+            self.add_item(DashboardButton(
+                label="🔧 الصيانة",
+                custom_id="prof_maintenance",
+                style=discord.ButtonStyle.secondary,
+                emoji="🔧",
+                row=5
+            ))
+
+            # الصف 6 - إدارة متقدمة
+            self.add_item(DashboardButton(
+                label="🎁 الهدايا",
+                custom_id="prof_gifts",
+                style=discord.ButtonStyle.success,
+                emoji="🎁",
+                row=6
+            ))
+            self.add_item(DashboardButton(
+                label="📢 البث",
+                custom_id="prof_broadcast",
+                style=discord.ButtonStyle.success,
+                emoji="📢",
+                row=6
+            ))
+            self.add_item(DashboardButton(
+                label="🗄️ البيانات",
+                custom_id="prof_database",
+                style=discord.ButtonStyle.danger,
+                emoji="🗄️",
+                row=6
+            ))
+
+            # الصف 7 - سجلات وتحالفات
+            self.add_item(DashboardButton(
+                label="📜 السجلات",
+                custom_id="prof_logs",
+                style=discord.ButtonStyle.secondary,
+                emoji="📜",
+                row=7
+            ))
+            self.add_item(DashboardButton(
+                label="🏰 التحالفات",
+                custom_id="prof_alliances",
+                style=discord.ButtonStyle.secondary,
+                emoji="🏰",
+                row=7
+            ))
+            self.add_item(DashboardButton(
+                label="🔄 تحديث",
+                custom_id="prof_refresh",
+                style=discord.ButtonStyle.secondary,
+                emoji="🔄",
+                row=7
+            ))
+
+
 class LanguageView(BaseView):
     """Language selection view."""
 
