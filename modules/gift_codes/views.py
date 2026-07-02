@@ -137,7 +137,8 @@ class AllianceRedeemModal(ui.Modal):
 async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     """Main gift codes callback - shows gift codes dashboard."""
     from discord import ButtonStyle
-    from views.buttons import DashboardButton, DashboardView
+    from views.buttons import DashboardButton
+    from modules.dashboard.views import DashboardView
     
     embed = discord.Embed(
         title="🎁 إدارة أكواد الهدايا",
