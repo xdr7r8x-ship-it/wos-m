@@ -16,6 +16,7 @@ class PermissionLevel(Enum):
     SERVER_ADMIN = 3
     ADMIN = 3  # Alias for SERVER_ADMIN
     ALLIANCE_ADMIN = 4
+    MODERATOR = 4  # Backward-compatible alias used by owner panel flows
     MEMBER = 5
 
     @classmethod
@@ -27,9 +28,21 @@ class PermissionLevel(Enum):
             "server_admin": cls.SERVER_ADMIN,
             "admin": cls.SERVER_ADMIN,
             "alliance_admin": cls.ALLIANCE_ADMIN,
+            "moderator": cls.ALLIANCE_ADMIN,
             "member": cls.MEMBER,
         }
-        return mapping.get(value.lower(), cls.MEMBER)
+        return mapping.get(str(value).lower(), cls.MEMBER)
+
+    def to_role(self) -> str:
+        """Return database-safe role value."""
+        mapping = {
+            PermissionLevel.OWNER: "owner",
+            PermissionLevel.GLOBAL_ADMIN: "global_admin",
+            PermissionLevel.SERVER_ADMIN: "server_admin",
+            PermissionLevel.ALLIANCE_ADMIN: "alliance_admin",
+            PermissionLevel.MEMBER: "member",
+        }
+        return mapping.get(self, "member")
 
     def __ge__(self, other: "PermissionLevel") -> bool:
         """Check if permission level is >= another."""
@@ -109,6 +122,11 @@ class PermissionGuard:
             query += " AND (guild_id = ? OR guild_id IS NULL)"
             params.append(str(guild_id))
         
+        if alliance_id:
+            query += " AND (alliance_id = ? OR alliance_id IS NULL)"
+            params.append(int(alliance_id))
+
+        query += " ORDER BY CASE role WHEN 'owner' THEN 1 WHEN 'global_admin' THEN 2 WHEN 'server_admin' THEN 3 WHEN 'alliance_admin' THEN 4 ELSE 5 END LIMIT 1"
         row = await db.fetchone(query, tuple(params))
         
         if row:
@@ -158,6 +176,59 @@ class PermissionGuard:
         return await db.fetchall(
             "SELECT * FROM admins ORDER BY role, added_at"
         )
+
+    async def assign_permission(
+        self,
+        user_id: str,
+        level: PermissionLevel,
+        guild_id: Optional[str] = None,
+        alliance_id: Optional[int] = None,
+        granted_by: Optional[str] = None,
+    ) -> bool:
+        """Assign or replace a user's permission level."""
+        if level == PermissionLevel.OWNER:
+            return await self.set_owner(user_id)
+
+        role = level.to_role()
+        await db.execute(
+            """
+            INSERT OR REPLACE INTO permissions
+            (discord_id, role, guild_id, alliance_id, granted_by)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (str(user_id), role, str(guild_id) if guild_id else None, alliance_id, str(granted_by) if granted_by else None)
+        )
+        await db.commit()
+        return True
+
+    async def revoke_permission(
+        self,
+        user_id: str,
+        level: Optional[PermissionLevel] = None,
+        guild_id: Optional[str] = None,
+        alliance_id: Optional[int] = None,
+    ) -> bool:
+        """Remove a permission from a user. If level is None, remove all scoped permissions."""
+        query = "DELETE FROM permissions WHERE discord_id = ?"
+        params = [str(user_id)]
+
+        if level is not None:
+            query += " AND role = ?"
+            params.append(level.to_role())
+        if guild_id is not None:
+            query += " AND (guild_id = ? OR guild_id IS NULL)"
+            params.append(str(guild_id))
+        if alliance_id is not None:
+            query += " AND (alliance_id = ? OR alliance_id IS NULL)"
+            params.append(int(alliance_id))
+
+        await db.execute(query, tuple(params))
+
+        if level in (None, PermissionLevel.OWNER):
+            await self.remove_admin(user_id)
+
+        await db.commit()
+        return True
     
     async def set_owner(self, user_id: str, user_name: Optional[str] = None) -> bool:
         """Transfer ownership to a new user."""
