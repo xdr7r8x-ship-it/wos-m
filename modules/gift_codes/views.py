@@ -153,7 +153,7 @@ async def gift_codes_callback(bot: WOSMBot, interaction: discord.Interaction):
     embed.add_field(name="⚙️ تلقائي", value="إدارة الاسترداد التلقائي", inline=False)
     embed.add_field(name="📊 التقرير", value="عرض تقرير الأكواد", inline=False)
     
-    view = DashboardView(timeout=300)
+    view = DashboardView(bot=bot, user_id=interaction.user.id)
     view.add_item(DashboardButton(
         style=ButtonStyle.primary,
         label="➕ إضافة كود",
