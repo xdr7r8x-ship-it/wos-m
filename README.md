@@ -7,7 +7,7 @@
 
 **WOS-M** (Whiteout Survival Management Bot) is a production-grade Discord bot designed for Whiteout Survival game management, featuring:
 
-> **Current release status**: ✅ Production-ready. All 267 tests passing. CI/CD configured with Dependabot auto-merge.
+> **Current release status**: ✅ Production-ready. All 290 tests passing. CI/CD configured with Dependabot auto-merge.
 
 - **Real Gift Code Redemption** via WhiteoutProject API
 - **ONNX Captcha Solver** (~97.9% accuracy)
