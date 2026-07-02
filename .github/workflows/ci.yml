@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio certifi aiohttp ddddocr
+          pip install pytest pytest-asyncio certifi aiohttp ddddocr psutil
           pip install -r requirements-dev.txt || true
         
       - name: Create .env for tests

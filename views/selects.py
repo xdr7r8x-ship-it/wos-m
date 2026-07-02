@@ -309,6 +309,12 @@ class OwnerPanelSectionSelect(ui.Select):
     def __init__(self):
         options = [
             discord.SelectOption(
+                label=i18n.get("owner_panel.operations_center"),
+                value="operations",
+                emoji="🛠️",
+                description="Operations monitoring and control"
+            ),
+            discord.SelectOption(
                 label=i18n.get("owner_panel.language_management"),
                 value="language",
                 emoji="🌐",
@@ -349,7 +355,8 @@ class OwnerPanelSectionSelect(ui.Select):
         super().__init__(
             custom_id="owner_panel_section_select",
             placeholder=i18n.get("owner_panel.title"),
-            options=options
+            options=options,
+            max_values=1
         )
 
 

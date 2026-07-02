@@ -304,7 +304,8 @@
     "link_feature": "🔗 Link Feature to Button",
     "feature_permission": "🔐 Feature Permission",
     "feature_status": "📊 Feature Status",
-    "feature_registry": "📦 Feature Registry"
+    "feature_registry": "📦 Feature Registry",
+    "operations_center": "🛠️ Operations Center"
   },
   "language": {
     "title": "🌐 Change Language",
@@ -346,5 +347,44 @@
     "details": "Details",
     "category": "Category",
     "no_logs": "📭 No logs available"
+  },
+  "operations": {
+    "title": "🛠️ Operations Center",
+    "description": "System monitoring and management",
+    "health_check": "💚 Health Check",
+    "metrics": "📊 Metrics",
+    "incidents": "🚨 Incidents",
+    "alerts": "🔔 Alerts",
+    "alert_test": "🧪 Test",
+    "alert_toggle": "🔇 Toggle",
+    "backup": "💾 Backup",
+    "backup_create": "➕ Create",
+    "backup_list": "📋 List",
+    "backup_verify": "✅ Verify",
+    "rollback": "↩️ Rollback",
+    "rollback_cancel": "❌ Cancel",
+    "upgrade": "🚀 Upgrade",
+    "upgrade_check": "🔍 Check",
+    "upgrade_apply": "🚀 Apply",
+    "self_heal": "🧰 Self-Heal",
+    "self_heal_toggle": "🔄 Toggle",
+    "self_heal_run": "🧰 Run",
+    "reports": "📄 Reports",
+    "report_health": "🏥 Health",
+    "report_incidents": "🚨 Incidents",
+    "report_release": "🚀 Release",
+    "settings": "⚙️ Settings",
+    "settings_scheduler": "📅 Scheduler",
+    "settings_backup_retention": "💾 Retention"
+  },
+  "health": {
+    "healthy": "Healthy",
+    "degraded": "Degraded",
+    "unhealthy": "Unhealthy",
+    "checking": "Checking...",
+    "checks_passed": "Checks passed",
+    "checks_failed": "Checks failed",
+    "last_check": "Last check",
+    "suggested_action": "Suggested action"
   }
 }

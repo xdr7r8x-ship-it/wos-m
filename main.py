@@ -93,10 +93,56 @@ def check_system():
 
     issues = []
 
+    # Check operations system
+    print("\n🛠️ Checking Operations System...")
+    ops_modules = [
+        "core/operations/health.py",
+        "core/operations/monitor.py",
+        "core/operations/alerts.py",
+        "core/operations/backup.py",
+        "core/operations/versioning.py",
+        "core/operations/upgrades.py",
+        "core/operations/rollback.py",
+        "core/operations/metrics.py",
+        "core/operations/scheduler.py",
+        "core/operations/self_healing.py",
+        "core/operations/incident_reports.py",
+        "core/operations/audit.py",
+    ]
+    ops_ok = True
+    for mod in ops_modules:
+        if not (Path(__file__).parent / mod).exists():
+            print(f"  ❌ Missing: {mod}")
+            ops_ok = False
+            issues.append(f"Missing: {mod}")
+        else:
+            print(f"  ✅ {mod}")
+    if ops_ok:
+        print("✅ Operations system: ALL MODULES PRESENT")
+    else:
+        print("❌ Operations system: MISSING MODULES")
+
     # Runtime checks - skipped in static mode
+    print("\n📋 Static Checks:")
     print("PASS: .env check skipped (static mode)")
     print("PASS: BOT_TOKEN check skipped (static mode)")
     print("INFO: Runtime checks (demo_mode, OCR, adapter) skipped")
+
+    # Import health check
+    print("\n🏥 Testing Operations Health Check...")
+    try:
+        from core.operations.health import run_health_check_sync
+        result = run_health_check_sync()
+        status = result.get("overall_status", "unknown")
+        print(f"  Status: {status}")
+        print(f"  Checks: {result.get('checks_count', 0)}")
+        if status == "healthy":
+            print("✅ Health check: PASS")
+        else:
+            print(f"⚠️ Health check: {status}")
+    except Exception as e:
+        print(f"❌ Health check failed: {e}")
+        issues.append(f"Health check failed: {e}")
 
     # Check schema columns
     db_file = Path(__file__).parent / "core" / "database.py"

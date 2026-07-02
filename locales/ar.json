@@ -304,7 +304,8 @@
     "link_feature": "🔗 ربط ميزة بزر",
     "feature_permission": "🔐 صلاحية الميزة",
     "feature_status": "📊 حالة الميزة",
-    "feature_registry": "📦 سجل الميزات"
+    "feature_registry": "📦 سجل الميزات",
+    "operations_center": "🛠️ مركز العمليات"
   },
   "language": {
     "title": "🌐 تغيير اللغة",
@@ -346,5 +347,44 @@
     "details": "التفاصيل",
     "category": "الفئة",
     "no_logs": "📭 لا توجد سجلات"
+  },
+  "operations": {
+    "title": "🛠️ مركز العمليات",
+    "description": "مراقبة وإدارة النظام",
+    "health_check": "💚 فحص الصحة",
+    "metrics": "📊 المقاييس",
+    "incidents": "🚨 الحوادث",
+    "alerts": "🔔 التنبيهات",
+    "alert_test": "🧪 اختبار",
+    "alert_toggle": "🔇 تبديل",
+    "backup": "💾 النسخ",
+    "backup_create": "➕ إنشاء",
+    "backup_list": "📋 القائمة",
+    "backup_verify": "✅ التحقق",
+    "rollback": "↩️ التراجع",
+    "rollback_cancel": "❌ إلغاء",
+    "upgrade": "🚀 الترقية",
+    "upgrade_check": "🔍 فحص",
+    "upgrade_apply": "🚀 تطبيق",
+    "self_heal": "🧰 الإصلاح",
+    "self_heal_toggle": "🔄 تبديل",
+    "self_heal_run": "🧰 تشغيل",
+    "reports": "📄 التقارير",
+    "report_health": "🏥 الصحة",
+    "report_incidents": "🚨 الحوادث",
+    "report_release": "🚀 Release",
+    "settings": "⚙️ الإعدادات",
+    "settings_scheduler": "📅 المجدول",
+    "settings_backup_retention": "💾 الاحتفاظ"
+  },
+  "health": {
+    "healthy": "صحي",
+    "degraded": "متدهور",
+    "unhealthy": "غير صحي",
+    "checking": "جارٍ الفحص...",
+    "checks_passed": "الفحوصات ناجحة",
+    "checks_failed": "فحوصات فاشلة",
+    "last_check": "آخر فحص",
+    "suggested_action": "الإجراء المقترح"
   }
 }

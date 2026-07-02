@@ -700,6 +700,28 @@ class WOSMBot(discord.Client):
         from modules.owner_panel.views import feature_management_callback
         await feature_management_callback(self, interaction)
     
+    async def _handle_operations_panel(self, interaction: discord.Interaction):
+        """Show the operations control center panel."""
+        from modules.operations.views import OperationsPanelView
+        from core.permissions import PermissionGuard
+        
+        # Check owner permission
+        guard = PermissionGuard(self)
+        if not await guard.has_permission(str(interaction.user.id)):
+            await interaction.response.send_message(
+                i18n.get("errors.permission_denied"),
+                ephemeral=True
+            )
+            return
+        
+        view = OperationsPanelView(owner_id=interaction.user.id)
+        embed = discord.Embed(
+            title=i18n.get("operations.title"),
+            description=i18n.get("operations.description"),
+            color=0x3498db
+        )
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+    
     async def _handle_confirm(self, interaction: discord.Interaction):
         await interaction.response.send_message(i18n.get("messages.action_completed"), ephemeral=True)
     
@@ -720,6 +742,7 @@ class WOSMBot(discord.Client):
         if interaction.data.get("values"):
             section = interaction.data["values"][0]
             handlers = {
+                "operations": self._handle_operations_panel,
                 "language": self._handle_owner_language,
                 "buttons": self._handle_owner_buttons,
                 "texts": self._handle_owner_texts,
